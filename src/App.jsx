@@ -10,7 +10,7 @@ const DEFAULT_FORM = {
 
 const SAMPLE_COUNT = 40
 
-function round(value) {
+function roundToTwoDecimals(value) {
   return Number(value.toFixed(2))
 }
 
@@ -56,15 +56,15 @@ function App() {
       const x = velocityX * time
       const y = initialHeight + velocityY * time - 0.5 * gravity * time ** 2
       return {
-        x: round(x),
-        y: round(Math.max(y, 0)),
+        x: roundToTwoDecimals(x),
+        y: roundToTwoDecimals(Math.max(y, 0)),
       }
     })
 
     return {
-      flightTime: round(flightTime),
-      maxHeight: round(maxHeight),
-      range: round(range),
+      flightTime: roundToTwoDecimals(flightTime),
+      maxHeight: roundToTwoDecimals(maxHeight),
+      range: roundToTwoDecimals(range),
       points,
     }
   }, [form])
