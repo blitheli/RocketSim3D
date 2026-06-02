@@ -1,0 +1,350 @@
+.app {
+  display: grid;
+  grid-template-rows: auto 1fr minmax(220px, 34vh);
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(47, 111, 237, 0.08), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(255, 140, 66, 0.06), transparent 30%),
+    var(--bg-app);
+}
+
+.app-main {
+  display: grid;
+  grid-template-columns: minmax(420px, 46%) 1fr;
+  min-height: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.param-panel {
+  overflow: auto;
+  padding: 12px;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+}
+
+.view-panel {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  background: #05070a;
+}
+
+.bottom-panel {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-height: 0;
+  background: var(--bg-panel-alt);
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+
+.status-bar .success {
+  color: var(--success);
+}
+
+.status-bar .error {
+  color: var(--danger);
+}
+
+.status-bar .loading {
+  color: var(--accent);
+}
+
+.top-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 10px 14px;
+  background: var(--bg-panel-alt);
+  box-shadow: var(--shadow);
+}
+
+.top-bar-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-bar-section label {
+  color: var(--text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.top-bar-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  background: var(--btn);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 6px 14px;
+  transition: background 0.15s;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--btn-hover);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--btn-primary);
+  border-color: rgba(68, 128, 255, 0.6);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--btn-primary-hover);
+}
+
+.btn-danger {
+  background: rgba(239, 83, 80, 0.25);
+  border-color: rgba(239, 83, 80, 0.5);
+}
+
+.group-box {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.group-box-title {
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--accent-soft);
+}
+
+.group-box-body {
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.field-label {
+  flex: 0 0 110px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.field-control {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-control input,
+.field-control select {
+  width: 100%;
+}
+
+.field-unit {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.field-full {
+  grid-column: 1 / -1;
+}
+
+.rocket-info {
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.engine-card {
+  grid-column: 1 / -1;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px;
+  margin-top: 4px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.engine-card-title {
+  font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.optim-table-wrap {
+  overflow: auto;
+  grid-column: 1 / -1;
+}
+
+.optim-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.optim-table th,
+.optim-table td {
+  border: 1px solid var(--border);
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.optim-table th {
+  background: var(--table-head);
+  color: var(--text);
+}
+
+.optim-table input[type='checkbox'] {
+  width: auto;
+}
+
+.stage-table-wrap {
+  overflow: auto;
+  max-height: 180px;
+  border-top: 1px solid var(--border);
+}
+
+.stage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.stage-table th,
+.stage-table td {
+  border: 1px solid var(--border);
+  padding: 5px 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stage-table th {
+  background: var(--table-head);
+}
+
+.stage-table tbody tr:nth-child(odd) {
+  background: var(--table-row-a);
+}
+
+.stage-table tbody tr:nth-child(even) {
+  background: var(--table-row-b);
+}
+
+.stage-table .result-col {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.charts-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.chart-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.chart-tab {
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: 4px 4px 0 0;
+}
+
+.chart-tab.active {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border);
+}
+
+.chart-container {
+  position: relative;
+  flex: 1;
+  min-height: 160px;
+}
+
+.chart-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.chart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.cesium-wrap {
+  width: 100%;
+  height: 100%;
+}
+
+.cesium-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  font-size: 12px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+@media (max-width: 1100px) {
+  .app-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 45vh 1fr;
+  }
+
+  .param-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
