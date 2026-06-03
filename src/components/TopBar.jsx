@@ -3,14 +3,10 @@ import { ROCKET_PRESETS } from '../data/rockets'
 export default function TopBar({
   presetId,
   onPresetChange,
-  integrator,
-  onIntegratorChange,
   startTime,
   endTime,
-  stepSize,
   onStartTimeChange,
   onEndTimeChange,
-  onStepSizeChange,
   loading,
   onLoad,
   onSave,
@@ -32,18 +28,6 @@ export default function TopBar({
       </div>
 
       <div className="top-bar-section">
-        <label>积分器</label>
-        <select value={integrator} onChange={(e) => onIntegratorChange(e.target.value)}>
-          <option value="scheme">方案弹道</option>
-        </select>
-      </div>
-
-      <div className="top-bar-section">
-        <label>中心天体</label>
-        <span>地球</span>
-      </div>
-
-      <div className="top-bar-section">
         <label>开始</label>
         <input type="text" value={startTime} onChange={(e) => onStartTimeChange(e.target.value)} />
       </div>
@@ -51,17 +35,6 @@ export default function TopBar({
       <div className="top-bar-section">
         <label>结束</label>
         <input type="text" value={endTime} onChange={(e) => onEndTimeChange(e.target.value)} />
-      </div>
-
-      <div className="top-bar-section">
-        <label>步长</label>
-        <input
-          type="number"
-          value={stepSize}
-          onChange={(e) => onStepSizeChange(e.target.value)}
-          style={{ width: 70 }}
-        />
-        <span>s</span>
       </div>
 
       <div className="top-bar-actions">

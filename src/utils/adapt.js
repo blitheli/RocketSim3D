@@ -185,14 +185,15 @@ export function buildChartConfigs(series) {
     axisLine: { lineStyle: { color: '#6b7a90' } },
   }
 
-  const baseGrid = { left: 56, right: 24, top: 44, bottom: 32 }
+  const baseGrid = { left: 40, right: 8, top: 28, bottom: 22 }
+  const titleStyle = { color: '#e8edf5', fontSize: 11 }
 
   return {
     q: {
       title: '时间-动压',
       option: {
         backgroundColor: 'transparent',
-        title: { text: '时间-动压', left: 'center', textStyle: { color: '#e8edf5', fontSize: 13 } },
+        title: { text: '时间-动压', left: 'center', textStyle: titleStyle },
         tooltip: { trigger: 'axis' },
         grid: baseGrid,
         xAxis: baseX,
@@ -204,10 +205,10 @@ export function buildChartConfigs(series) {
       title: '时间-高度/速度',
       option: {
         backgroundColor: 'transparent',
-        title: { text: '时间-高度/速度', left: 'center', textStyle: { color: '#e8edf5', fontSize: 13 } },
+        title: { text: '时间-高度/速度', left: 'center', textStyle: titleStyle },
         tooltip: { trigger: 'axis' },
-        legend: { data: ['高度', '速度'], textStyle: { color: '#c8d0dc' }, top: 24 },
-        grid: { ...baseGrid, right: 56 },
+        legend: { data: ['高度', '速度'], textStyle: { color: '#c8d0dc', fontSize: 9 }, top: 16, itemWidth: 12 },
+        grid: { ...baseGrid, right: 36 },
         xAxis: baseX,
         yAxis: [
           { type: 'value', name: '高度(m)', axisLine: { lineStyle: { color: '#6b7a90' } } },
@@ -223,7 +224,7 @@ export function buildChartConfigs(series) {
       title: '时间-轴向过载',
       option: {
         backgroundColor: 'transparent',
-        title: { text: '时间-轴向过载', left: 'center', textStyle: { color: '#e8edf5', fontSize: 13 } },
+        title: { text: '时间-轴向过载', left: 'center', textStyle: titleStyle },
         tooltip: { trigger: 'axis' },
         grid: baseGrid,
         xAxis: baseX,
@@ -235,7 +236,7 @@ export function buildChartConfigs(series) {
       title: '时间-质量',
       option: {
         backgroundColor: 'transparent',
-        title: { text: '时间-质量', left: 'center', textStyle: { color: '#e8edf5', fontSize: 13 } },
+        title: { text: '时间-质量', left: 'center', textStyle: titleStyle },
         tooltip: { trigger: 'axis' },
         grid: baseGrid,
         xAxis: baseX,

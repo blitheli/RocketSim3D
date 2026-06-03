@@ -2,7 +2,6 @@ import GroupBox from './params/GroupBox'
 import Field from './params/Field'
 import BasicParams from './params/BasicParams'
 import OrbitParams from './params/OrbitParams'
-import Timeline from './params/Timeline'
 import StageGroup from './params/StageGroup'
 import OptimProfile from './params/OptimProfile'
 import { getRocketType } from '../data/rockets'
@@ -55,7 +54,6 @@ export default function ParamPanel({ payload, onChange }) {
 
       <BasicParams input={input} onChange={updateInput} />
       <OrbitParams input={input} onChange={updateInput} />
-      <Timeline rocketType={rocketType} input={input} onChange={updateInput} />
 
       <StageGroup
         rocketType={rocketType}
