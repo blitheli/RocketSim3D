@@ -7,7 +7,7 @@ export default function BasicParams({ input, onChange }) {
   const lla = input.FaSheDianLLA ?? [0, 0, 0]
 
   return (
-    <>
+    <div className="params-row">
       <GroupBox title="基本参数">
         <Field label="发射点">
           <select
@@ -101,6 +101,6 @@ export default function BasicParams({ input, onChange }) {
           />
         </Field>
       </GroupBox>
-    </>
+    </div>
   )
 }

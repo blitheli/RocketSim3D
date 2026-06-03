@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import TopBar from './components/TopBar'
+import OptimConfigModal from './components/OptimConfigModal'
 import ParamPanel from './components/ParamPanel'
 import TimelinePanel from './components/TimelinePanel'
 import Cesium3D from './components/Cesium3D'
@@ -29,6 +30,7 @@ export default function App() {
   const [startTime, setStartTime] = useState('2026-05-29 00:00:00.000 UTCG')
   const [endTime, setEndTime] = useState('2026-05-29 00:10:00.000 UTCG')
   const [loading, setLoading] = useState(false)
+  const [optimModalOpen, setOptimModalOpen] = useState(false)
   const [apiResult, setApiResult] = useState(null)
 
   const rocketType = getRocketType(payload)
@@ -122,21 +124,30 @@ export default function App() {
         onSave={handleSave}
         onCalculate={() => runRequest('calculate')}
         onOptimize={() => runRequest('optimize')}
+        onOpenOptimConfig={() => setOptimModalOpen(true)}
         onAbort={handleAbort}
+      />
+
+      <OptimConfigModal
+        open={optimModalOpen}
+        payload={payload}
+        onChange={setPayload}
+        onClose={() => setOptimModalOpen(false)}
       />
 
       <div className="app-main">
         <ParamPanel payload={payload} onChange={setPayload} />
-        <Cesium3D
-          trajectoryPoints={trajectoryPoints}
-          rocketType={rocketType}
-          launchSite={payload.RocketInput?.Name_FaSheDian}
-        />
         <TimelinePanel payload={payload} onChange={setPayload} />
-      </div>
-
-      <div className="bottom-panel">
-        <TrajectoryCharts series={series} />
+        <div className="center-column">
+          <Cesium3D
+            trajectoryPoints={trajectoryPoints}
+            rocketType={rocketType}
+            launchSite={payload.RocketInput?.Name_FaSheDian}
+          />
+          <div className="bottom-panel">
+            <TrajectoryCharts series={series} />
+          </div>
+        </div>
       </div>
     </div>
   )

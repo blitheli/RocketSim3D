@@ -1,6 +1,6 @@
-export default function Field({ label, unit, children, full = false }) {
+export default function Field({ label, unit, children, full = false, className = '' }) {
   return (
-    <div className={`field ${full ? 'field-full' : ''}`}>
+    <div className={`field ${full ? 'field-full' : ''} ${className}`.trim()}>
       {label && <span className="field-label">{label}</span>}
       <div className="field-control">
         {children}

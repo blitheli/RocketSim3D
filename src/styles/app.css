@@ -1,6 +1,6 @@
 .app {
   display: grid;
-  grid-template-rows: auto 1fr minmax(300px, 36vh);
+  grid-template-rows: auto 1fr;
   width: 100%;
   height: 100%;
   background:
@@ -11,9 +11,16 @@
 
 .app-main {
   display: grid;
-  grid-template-columns: minmax(340px, 32%) 1fr minmax(280px, 26%);
+  grid-template-columns: 25% minmax(260px, 20%) minmax(0, 1fr);
   min-height: 0;
   border-top: 1px solid var(--border);
+}
+
+.center-column {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(220px, 32vh);
+  min-width: 0;
+  min-height: 0;
   border-bottom: 1px solid var(--border);
 }
 
@@ -24,15 +31,290 @@
   border-right: 1px solid var(--border);
 }
 
+.param-panel .params-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: start;
+}
+
+.param-panel .params-row .group-box {
+  margin-bottom: 0;
+  min-width: 0;
+  height: 100%;
+}
+
+.param-panel .params-row .group-box-body {
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.param-panel .params-row .field {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.param-panel .params-row .field-label {
+  flex: none;
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.param-panel .params-row .field-control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.param-panel .params-row .field-control input,
+.param-panel .params-row .field-control select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.param-panel .params-row .field-unit {
+  margin-left: 0;
+  padding-top: 2px;
+}
+
+.param-panel > .group-box .group-box-body {
+  grid-template-columns: 1fr;
+}
+
+.param-panel .orbit-params .group-box-body {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
+.param-panel .orbit-params .field {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+}
+
+.param-panel .orbit-params .field-label {
+  flex: none;
+  text-align: left;
+  font-size: 14px;
+}
+
+.param-panel .orbit-params .field-control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+}
+
+.param-panel .orbit-params .field-control input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.param-panel > .group-box:not(.orbit-params) .field,
+.param-panel .engine-card .field {
+  flex-direction: row;
+  align-items: center;
+}
+
+.param-panel > .group-box:not(.orbit-params):not(.stage-group) .field-label,
+.param-panel .engine-card .field-label {
+  flex: 0 0 92px;
+  text-align: right;
+}
+
+.param-panel .stage-group .stage-field-row .field-label {
+  flex: 0 0 3.5em;
+  min-width: 3.5em;
+  text-align: left;
+  white-space: nowrap;
+  flex-shrink: 0;
+  overflow: visible;
+  line-height: 1.3;
+}
+
+.param-panel > .group-box:not(.orbit-params):not(.stage-group) .field-control input,
+.param-panel > .group-box:not(.orbit-params):not(.stage-group) .field-control select {
+  min-width: 160px;
+  flex: 1;
+}
+
+.param-panel .stage-group .group-box-body {
+  grid-template-columns: 1fr;
+  padding: 8px 8px 8px 4px;
+}
+
+.param-panel .stage-field-row {
+  gap: 8px 10px;
+}
+
+.param-panel .stage-field-row .field {
+  gap: 6px;
+}
+
+.param-panel .stage-field-row,
+.param-panel .engine-field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
+.param-panel .engine-card {
+  --engine-label-w-left: 3.2em;
+  --engine-label-w-right: 4.6em;
+  min-width: 0;
+  overflow: hidden;
+  padding: 8px 8px 8px 6px;
+}
+
+/* 发动机卡片：6 列 subgrid（左：标签|输入|单位，右：标签|输入|单位） */
+.param-panel .engine-card .engine-card-body {
+  display: grid;
+  /* 左列标签更窄（名称、推力、比冲）；左列输入区更宽 */
+  grid-template-columns:
+    var(--engine-label-w-left) minmax(5rem, 1.35fr) minmax(0, 2.2em)
+    var(--engine-label-w-right) minmax(3.2rem, 1fr) minmax(0, 2.2em);
+  column-gap: 8px;
+  row-gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.param-panel .engine-card .engine-field-row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
+
+.param-panel .engine-card .engine-field-row .field {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: span 3;
+  align-items: center;
+  min-width: 0;
+}
+
+.param-panel .engine-card .engine-field-row .field-label {
+  flex: none;
+  font-size: 14px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* 左列（名称、推力、比冲）标签左对齐，整体更靠左 */
+.param-panel .engine-card .engine-field-row .field:first-child .field-label {
+  text-align: left;
+}
+
+.param-panel .engine-card .engine-field-row .field-control {
+  display: contents;
+}
+
+.param-panel .stage-field-row .field,
+.param-panel .engine-field-row .field {
+  min-width: 0;
+}
+
+.param-panel .stage-field-row .field-label {
+  font-size: 14px;
+}
+
+.param-panel .engine-field-row .field-label {
+  flex: 0 0 4.2em;
+  font-size: 14px;
+}
+
+.param-panel .stage-field-row .field-control,
+.param-panel .engine-field-row .field-control {
+  min-width: 0;
+}
+
+.param-panel .stage-field-row .field-control input,
+.param-panel .stage-field-row .field-control select {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+.param-panel .stage-field-row .field-input-compact {
+  gap: 6px;
+  min-width: 0;
+}
+
+.param-panel .stage-field-row .field-input-compact .field-control {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.param-panel .stage-field-row .field-input-compact .field-control input {
+  width: 100%;
+  min-width: 4rem;
+  max-width: 100%;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+}
+
+.param-panel .engine-card .engine-field-row .field-control input,
+.param-panel .engine-card .engine-field-row .field-control select {
+  box-sizing: border-box;
+}
+
+.param-panel .engine-card .field-input-wide .field-control input {
+  width: 100%;
+  min-width: 5.5rem;
+  max-width: 100%;
+  justify-self: stretch;
+}
+
+.param-panel .engine-card .field-input-medium .field-control input {
+  width: 100%;
+  min-width: 4.2rem;
+  max-width: 100%;
+  justify-self: stretch;
+}
+
+.param-panel .engine-card .field-engine-name .field-control input {
+  font-size: 14px;
+}
+
+.param-panel .engine-card .field-input-narrow .field-control input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  justify-self: stretch;
+}
+
+.param-panel .engine-card .engine-field-row .field-unit {
+  justify-self: start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+}
+
 .timeline-panel {
   overflow: auto;
   padding: 12px;
   background: var(--bg-panel);
-  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
 
 .timeline-panel .group-box {
-  margin-bottom: 0;
+  margin-bottom: 12px;
 }
 
 .timeline-panel .group-box-body {
@@ -82,7 +364,7 @@
 
 .top-bar-section label {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 16px;
   white-space: nowrap;
 }
 
@@ -133,7 +415,7 @@
 
 .group-box-title {
   padding: 6px 10px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--accent);
   border-bottom: 1px solid var(--border-strong);
@@ -156,7 +438,7 @@
 
 .field-label {
   flex: 0 0 110px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
   text-align: right;
 }
@@ -189,7 +471,7 @@
   margin-bottom: 12px;
   border: 1px dashed var(--border);
   border-radius: var(--radius);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
   line-height: 1.5;
 }
@@ -198,15 +480,47 @@
   grid-column: 1 / -1;
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 8px;
   margin-top: 4px;
   background: rgba(255, 255, 255, 0.02);
+}
+
+.engine-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  min-width: 0;
 }
 
 .engine-card-title {
   font-size: 12px;
   color: var(--accent);
-  margin-bottom: 8px;
+  margin: 0;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.engine-card-vacuum {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.engine-card-vacuum input[type='checkbox'] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.engine-card-body {
+  padding: 0;
 }
 
 .optim-table-wrap {
@@ -297,12 +611,11 @@
 
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr;
   gap: 8px;
   flex: 1;
-  min-height: 220px;
-  overflow-x: auto;
+  min-height: 200px;
 }
 
 .chart-cell {
@@ -373,7 +686,7 @@
     grid-template-rows: minmax(280px, 42vh) auto auto;
   }
 
-  .view-panel {
+  .center-column {
     grid-column: 1 / -1;
     grid-row: 1;
     min-height: 280px;
@@ -387,9 +700,101 @@
   }
 
   .timeline-panel {
-    grid-row: 3;
-    border-left: none;
+    grid-row: 2;
+    grid-column: 2;
+    border-right: none;
     border-top: 1px solid var(--border);
     max-height: 40vh;
   }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.modal-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.optim-modal {
+  width: min(960px, 96vw);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.modal-close {
+  min-width: 32px;
+  padding: 2px 8px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.modal-body {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+}
+
+.modal-body .group-box-body {
+  grid-template-columns: 1fr;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.modal-empty {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.optim-modal .optim-table-wrap {
+  overflow-x: auto;
+}
+
+.optim-modal .optim-table {
+  min-width: 100%;
+  font-size: 12px;
+}
+
+.optim-modal .optim-table th,
+.optim-modal .optim-table td {
+  white-space: nowrap;
 }

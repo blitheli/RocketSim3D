@@ -7,21 +7,23 @@ export default function StageGroup({ rocketType, input, onChange, onEngineChange
   const stages = STAGE_CONFIG[rocketType] ?? []
 
   return stages.map((stage) => (
-    <GroupBox key={stage.title} title={`${stage.title}参数`}>
-      <Field label="总质量" unit="kg">
-        <input
-          type="number"
-          value={input[stage.massKey] ?? 0}
-          onChange={(e) => onChange(stage.massKey, e.target.value)}
-        />
-      </Field>
-      <Field label="推进剂" unit="kg">
-        <input
-          type="number"
-          value={input[stage.fuelKey] ?? 0}
-          onChange={(e) => onChange(stage.fuelKey, e.target.value)}
-        />
-      </Field>
+    <GroupBox key={stage.title} title={`${stage.title}参数`} className="stage-group">
+      <div className="stage-field-row">
+        <Field label="总质量" unit="kg" className="field-input-compact">
+          <input
+            type="number"
+            value={input[stage.massKey] ?? 0}
+            onChange={(e) => onChange(stage.massKey, e.target.value)}
+          />
+        </Field>
+        <Field label="推进剂" unit="kg" className="field-input-compact">
+          <input
+            type="number"
+            value={input[stage.fuelKey] ?? 0}
+            onChange={(e) => onChange(stage.fuelKey, e.target.value)}
+          />
+        </Field>
+      </div>
       {stage.engines.map((engine) => (
         <EngineCard
           key={engine.key}

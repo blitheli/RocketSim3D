@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as echarts from 'echarts'
 import { buildChartConfigs } from '../../utils/adapt'
 
-const CHART_KEYS = ['q', 'hv', 'n']
+const CHART_KEYS = ['q', 'hv']
 
 function ChartCell({ title, option, hasData }) {
   const chartRef = useRef(null)

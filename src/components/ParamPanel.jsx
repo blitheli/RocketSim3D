@@ -1,9 +1,6 @@
-import GroupBox from './params/GroupBox'
-import Field from './params/Field'
 import BasicParams from './params/BasicParams'
 import OrbitParams from './params/OrbitParams'
 import StageGroup from './params/StageGroup'
-import OptimProfile from './params/OptimProfile'
 import { getRocketType } from '../data/rockets'
 
 export default function ParamPanel({ payload, onChange }) {
@@ -39,10 +36,6 @@ export default function ParamPanel({ payload, onChange }) {
     })
   }
 
-  const updateProfiles = (profiles) => {
-    onChange((prev) => ({ ...prev, Profiles: profiles }))
-  }
-
   return (
     <div className="param-panel">
       <div className="rocket-info">
@@ -61,26 +54,6 @@ export default function ParamPanel({ payload, onChange }) {
         onChange={updateInput}
         onEngineChange={updateEngine}
       />
-
-      <OptimProfile
-        profiles={payload.Profiles ?? []}
-        onChange={updateProfiles}
-      />
-
-      <GroupBox title="运行选项">
-        <Field label="运行优化" full>
-          <label className="field-control">
-            <input
-              type="checkbox"
-              checked={Boolean(payload.RunProfiles)}
-              onChange={(e) =>
-                onChange((prev) => ({ ...prev, RunProfiles: e.target.checked }))
-              }
-            />
-            RunProfiles
-          </label>
-        </Field>
-      </GroupBox>
     </div>
   )
 }

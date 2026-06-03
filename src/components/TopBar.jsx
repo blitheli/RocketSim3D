@@ -12,6 +12,7 @@ export default function TopBar({
   onSave,
   onCalculate,
   onOptimize,
+  onOpenOptimConfig,
   onAbort,
 }) {
   return (
@@ -55,6 +56,14 @@ export default function TopBar({
           disabled={loading}
         >
           优化
+        </button>
+        <button
+          type="button"
+          className="btn"
+          onClick={onOpenOptimConfig}
+          disabled={loading}
+        >
+          优化参数配置
         </button>
         <button
           type="button"

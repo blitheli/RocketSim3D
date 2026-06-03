@@ -5,14 +5,7 @@ export default function OrbitParams({ input, onChange }) {
   const smaKm = (input.sma0 ?? 0) / 1000
 
   return (
-    <GroupBox title="入轨参数">
-      <Field label="轨道类型">
-        <select defaultValue="">
-          <option value="">未指定</option>
-          <option value="LEO">LEO</option>
-          <option value="SSO">SSO</option>
-        </select>
-      </Field>
+    <GroupBox title="入轨参数" className="orbit-params">
       <Field label="长半轴" unit="km">
         <input
           type="number"

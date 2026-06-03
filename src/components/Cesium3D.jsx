@@ -5,6 +5,16 @@ import { ROCKET_TYPES } from '../data/rockets'
 
 Cesium.Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_ION_TOKEN ?? ''
 
+/** 按物理像素渲染（非 CSS 像素），避免高 DPI / 系统缩放下文字与线条发糊 */
+function applySharpRendering(viewer) {
+  viewer.useBrowserRecommendedResolution = false
+  viewer.resolutionScale = 1
+  if (viewer.scene.postProcessStages?.fxaa) {
+    viewer.scene.postProcessStages.fxaa.enabled = false
+  }
+  viewer.resize()
+}
+
 export default function Cesium3D({ trajectoryPoints, rocketType, launchSite }) {
   const containerRef = useRef(null)
   const viewerRef = useRef(null)
@@ -26,6 +36,7 @@ export default function Cesium3D({ trajectoryPoints, rocketType, launchSite }) {
       selectionIndicator: false,
       imageryProvider: false,
       terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
+      useBrowserRecommendedResolution: false,
     })
 
     if (!hasIonToken) {
@@ -38,9 +49,16 @@ export default function Cesium3D({ trajectoryPoints, rocketType, launchSite }) {
     }
 
     viewer.scene.globe.depthTestAgainstTerrain = true
+    applySharpRendering(viewer)
     viewerRef.current = viewer
 
+    const resizeObserver = new ResizeObserver(() => {
+      if (!viewer.isDestroyed()) applySharpRendering(viewer)
+    })
+    resizeObserver.observe(containerRef.current)
+
     return () => {
+      resizeObserver.disconnect()
       viewer.destroy()
       viewerRef.current = null
     }
@@ -71,8 +89,11 @@ export default function Cesium3D({ trajectoryPoints, rocketType, launchSite }) {
         },
         label: {
           text: `发射点 ${launchSite ?? ''}`,
-          font: '12px sans-serif',
+          font: '14px sans-serif',
           fillColor: Cesium.Color.WHITE,
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          outlineWidth: 2,
+          outlineColor: Cesium.Color.BLACK,
           pixelOffset: new Cesium.Cartesian2(0, -18),
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
         },
@@ -91,7 +112,7 @@ export default function Cesium3D({ trajectoryPoints, rocketType, launchSite }) {
           name: '弹道轨迹',
           polyline: {
             positions,
-            width: 3,
+            width: 4,
             material: new Cesium.PolylineGlowMaterialProperty({
               glowPower: 0.2,
               color: Cesium.Color.CYAN,
@@ -216,8 +237,11 @@ function addRocketPlaceholder(viewer, launchPos, rocketType) {
     },
     label: {
       text: `${meta.label}\n(模型加载失败)`,
-      font: '12px sans-serif',
+      font: '14px sans-serif',
       fillColor: Cesium.Color.WHITE,
+      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+      outlineWidth: 2,
+      outlineColor: Cesium.Color.BLACK,
       pixelOffset: new Cesium.Cartesian2(0, -30),
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
     },
