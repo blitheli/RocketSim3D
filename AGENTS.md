@@ -190,3 +190,43 @@ curl -X POST "http://astrox.cn:8764/Rocket/TrajectoryOptim" \
 - [README.md](README.md) — 产品功能需求
 - [UI.md](UI.md) — UI 布局与设计细节
 
+## Cursor Cloud specific instructions
+
+### 服务与端口
+
+| 服务 | 命令 | URL |
+| --- | --- | --- |
+| Vite 开发服务器 | `npm run dev`（见下方 tmux 说明） | http://localhost:5173 |
+| AstroX 弹道 API | 无需本地启动；开发时经 Vite 代理 | `POST /api/Rocket/TrajectoryOptim` → `http://astrox.cn:8764` |
+
+本项目无本地后端、无数据库。端到端联调需要能访问外网 `astrox.cn:8764`（及默认 OSM 瓦片 `tile.openstreetmap.org`）。
+
+### 依赖安装（Linux x64）
+
+Vite 8 使用 rolldown/lightningcss 原生绑定。在部分 Linux 云环境中，仅 `npm install` 可能因 npm 可选依赖问题导致 `npm run build` 失败。VM 启动更新脚本会在 `npm install` 后补装：
+
+`@rolldown/binding-linux-x64-gnu`、`lightningcss-linux-x64-gnu`（`--no-save`，不修改 `package.json`）。
+
+`npm run dev` 通常不依赖上述绑定即可运行；**生产构建**需要它们。
+
+### 常用命令
+
+标准命令见上文「开发命令」：`npm install`、`npm run dev`、`npm run build`、`npm run preview`。仓库**未配置** ESLint/Prettier 或 `npm test` 脚本。
+
+### 启动 dev 服务器
+
+Cesium 与 Vite 适合在 tmux 中长期运行，例如：
+
+```bash
+tmux -f /exec-daemon/tmux.portal.conf new-session -d -s vite-dev-server -c /workspace -- npm run dev
+```
+
+### 快速验证
+
+- API（不经 UI）：`curl -X POST "http://localhost:5173/api/Rocket/TrajectoryOptim" -H "Content-Type: application/json" -d "@DDJS/CZ-2D/CZ2D_SSO_260601.json"`
+- UI：打开 http://localhost:5173，点击顶栏「计算」，应出现 ECharts 曲线与 Cesium 弹道。
+
+### 可选环境变量
+
+- `VITE_CESIUM_ION_TOKEN`：启用 Cesium Ion 地形；未设置时使用 OpenStreetMap 底图（与本地开发一致）。
+
