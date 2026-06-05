@@ -1,13 +1,12 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import TopBar from './components/TopBar'
 import OptimConfigModal from './components/OptimConfigModal'
-import ParamPanel from './components/ParamPanel'
-import TimelinePanel from './components/TimelinePanel'
 import Cesium3D from './components/Cesium3D'
 import TrajectoryCharts from './components/charts/TrajectoryCharts'
 import {
   clonePayload,
   getPresetById,
+  getRocketPanel,
   getRocketType,
 } from './data/rockets'
 import {
@@ -34,6 +33,7 @@ export default function App() {
   const [apiResult, setApiResult] = useState(null)
 
   const rocketType = getRocketType(payload)
+  const RocketPanel = getRocketPanel(rocketType)
   const series = useMemo(() => extractAllData(apiResult), [apiResult])
   const trajectoryPoints = useMemo(
     () => extractTrajectoryPoints(apiResult),
@@ -136,8 +136,7 @@ export default function App() {
       />
 
       <div className="app-main">
-        <ParamPanel payload={payload} onChange={setPayload} />
-        <TimelinePanel payload={payload} onChange={setPayload} />
+        <RocketPanel payload={payload} onChange={setPayload} />
         <div className="center-column">
           <Cesium3D
             trajectoryPoints={trajectoryPoints}

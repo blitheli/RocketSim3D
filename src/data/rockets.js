@@ -2,6 +2,9 @@ import cz2dSso from '../../DDJS/CZ-2D/CZ2D_SSO_260601.json'
 import cz2dLeo from '../../DDJS/CZ-2D/CZ2D_LEO_260527.json'
 import cz4b from '../../DDJS/CZ-4B/CZ4B_SSO_260519.json'
 import cz4c from '../../DDJS/CZ-4C/CZ4C_SSO_260520.json'
+import CZ2DPanel from '../components/rockets/CZ2DPanel'
+import CZ4BPanel from '../components/rockets/CZ4BPanel'
+import CZ4CPanel from '../components/rockets/CZ4CPanel'
 
 export const ROCKET_TYPES = {
   'CZ-2D': {
@@ -64,4 +67,14 @@ export function clonePayload(payload) {
 
 export function getRocketType(payload) {
   return payload?.RocketInput?.$type ?? 'CZ-2D'
+}
+
+export const ROCKET_PANELS = {
+  'CZ-2D': CZ2DPanel,
+  'CZ-4B': CZ4BPanel,
+  'CZ-4C': CZ4CPanel,
+}
+
+export function getRocketPanel(rocketType) {
+  return ROCKET_PANELS[rocketType] ?? CZ2DPanel
 }
