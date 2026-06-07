@@ -1,6 +1,12 @@
 import GroupBox from './GroupBox'
 import Field from './Field'
-import { LAUNCH_SITES } from '../../utils/rocketSchema'
+
+const LAUNCH_SITES = [
+  { id: 'ty', label: '太原 (ty)' },
+  { id: 'xc', label: '西昌 (xc)' },
+  { id: 'jqs', label: '酒泉 (jqs)' },
+  { id: 'custom', label: '自定义坐标' },
+]
 
 export default function BasicParams({ input, onChange }) {
   const useCustomSite = input.Name_FaSheDian === 'custom'

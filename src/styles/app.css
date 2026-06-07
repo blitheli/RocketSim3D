@@ -11,7 +11,7 @@
 
 .app-main {
   display: grid;
-  grid-template-columns: minmax(0, 45%) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   min-height: 0;
   border-top: 1px solid var(--border);
 }
@@ -43,7 +43,7 @@
   background: var(--bg-panel);
   border-right: 1px solid var(--border);
   min-width: 0;
-  flex: 1.25 1 0;
+  flex: 1 1 0;
 }
 
 .param-panel .basic-params .group-box-body {
@@ -278,7 +278,7 @@
   padding: 12px;
   background: var(--bg-panel);
   border-right: none;
-  min-width: 240px;
+  min-width: 0;
   flex: 1 1 0;
 }
 
@@ -329,6 +329,14 @@
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--text);
+}
+
+.mass-table-remaining {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .timeline-panel .group-box-body {
@@ -434,13 +442,65 @@
 }
 
 .top-bar {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 12px 16px;
   padding: 10px 14px;
   background: var(--bg-panel-alt);
   box-shadow: var(--shadow);
+}
+
+.top-bar-title {
+  margin: 0;
+  grid-column: 2;
+  justify-self: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.top-bar-info {
+  grid-column: 1;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.top-bar-type {
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(47, 111, 237, 0.15);
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.top-bar-scheme {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+.top-bar-user {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 14px;
 }
 
 .top-bar-section {
@@ -456,8 +516,10 @@
 }
 
 .top-bar-actions {
-  margin-left: auto;
+  grid-column: 3;
+  justify-self: end;
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -882,4 +944,136 @@
 .optim-modal .optim-table th,
 .optim-modal .optim-table td {
   white-space: nowrap;
+}
+
+.login-modal,
+.scheme-modal {
+  width: min(520px, 96vw);
+}
+
+.scheme-modal {
+  width: min(640px, 96vw);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.login-field input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 15px;
+}
+
+.login-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.login-footer {
+  margin-top: 4px;
+  padding: 0;
+  border-top: none;
+}
+
+.scheme-section + .scheme-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.scheme-section-title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.scheme-group {
+  margin-bottom: 10px;
+}
+
+.scheme-group-label {
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.scheme-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scheme-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scheme-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-panel);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.scheme-item:hover:not(:disabled) {
+  background: var(--btn-hover);
+}
+
+.scheme-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.scheme-item-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.scheme-item-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.scheme-delete {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: var(--text-muted);
 }

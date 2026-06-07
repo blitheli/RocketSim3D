@@ -1,12 +1,13 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import TopBar from './components/TopBar'
 import OptimConfigModal from './components/OptimConfigModal'
+import LoginModal from './components/LoginModal'
+import SchemeModal from './components/SchemeModal'
+import SaveSchemeModal from './components/SaveSchemeModal'
 import Cesium3D from './components/Cesium3D'
 import TrajectoryCharts from './components/charts/TrajectoryCharts'
 import {
-  ROCKET_PRESETS,
   clonePayload,
-  getPresetById,
   getRocketPanel,
   getRocketType,
 } from './data/rockets'
@@ -16,22 +17,47 @@ import {
   mergeOptimizedPayload,
   optimizeTrajectory,
 } from './api/trajectory'
+import { clearSession, getStoredUser } from './api/auth'
+import { fetchTemplate, fetchTemplates, saveUserScheme } from './api/schemes'
 import {
   extractAllData,
   extractShiXuTable,
   extractTrajectoryPoints,
 } from './utils/adapt'
 
-const DEFAULT_PRESET_ID = 'cz2d-sso'
-
 export default function App() {
-  const fileInputRef = useRef(null)
-  const [payload, setPayload] = useState(() => clonePayload(getPresetById(DEFAULT_PRESET_ID).payload))
+  const [payload, setPayload] = useState(null)
+  const [schemeName, setSchemeName] = useState('')
   const [loading, setLoading] = useState(false)
   const [optimModalOpen, setOptimModalOpen] = useState(false)
+  const [schemeModalOpen, setSchemeModalOpen] = useState(false)
+  const [loginModalOpen, setLoginModalOpen] = useState(false)
+  const [saveModalOpen, setSaveModalOpen] = useState(false)
   const [apiResult, setApiResult] = useState(null)
+  const [user, setUser] = useState(() => getStoredUser())
 
-  const rocketType = getRocketType(payload)
+  useEffect(() => {
+    let cancelled = false
+    const init = async () => {
+      try {
+        const templates = await fetchTemplates()
+        const first = templates[0]
+        if (!first || cancelled) return
+        const data = await fetchTemplate(first.file)
+        if (cancelled) return
+        setPayload(clonePayload(data))
+        setSchemeName(`${first.type} ${first.name}`)
+      } catch (err) {
+        console.error(err.message || '加载默认模板失败')
+      }
+    }
+    init()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const rocketType = payload ? getRocketType(payload) : 'CZ-2D'
   const RocketPanel = getRocketPanel(rocketType)
   const series = useMemo(() => extractAllData(apiResult), [apiResult])
   const trajectoryPoints = useMemo(
@@ -39,35 +65,19 @@ export default function App() {
     [apiResult],
   )
   const shiXuTable = useMemo(() => extractShiXuTable(apiResult), [apiResult])
-  const handleRocketTypeChange = useCallback((type) => {
-    const preset = ROCKET_PRESETS.find((p) => p.type === type)
-    if (!preset) return
-    setPayload(clonePayload(preset.payload))
+
+  const handleSchemeSelect = useCallback(({ name, payload: nextPayload }) => {
+    setPayload(nextPayload)
+    setSchemeName(name)
     setApiResult(null)
   }, [])
 
-  const handleLoad = useCallback(() => {
-    fileInputRef.current?.click()
-  }, [])
-
-  const handleFileSelected = useCallback((event) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      try {
-        const json = JSON.parse(String(reader.result))
-        setPayload(json)
-        setApiResult(null)
-      } catch {
-        console.error('JSON 解析失败')
-      }
-    }
-    reader.readAsText(file, 'UTF-8')
-    event.target.value = ''
-  }, [])
-
   const handleSave = useCallback(() => {
+    if (user) {
+      setSaveModalOpen(true)
+      return
+    }
+    if (!payload) return
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: 'application/json',
     })
@@ -77,9 +87,20 @@ export default function App() {
     anchor.download = `${payload.RocketInput?.Name ?? 'rocket'}.json`
     anchor.click()
     URL.revokeObjectURL(url)
+  }, [user, payload])
+
+  const handleSaveToServer = useCallback(async (name) => {
+    await saveUserScheme(name, payload)
+    setSchemeName(name)
   }, [payload])
 
+  const handleLogout = useCallback(() => {
+    clearSession()
+    setUser(null)
+  }, [])
+
   const runRequest = useCallback(async (mode) => {
+    if (!payload) return
     setLoading(true)
     try {
       const result =
@@ -103,26 +124,49 @@ export default function App() {
     setLoading(false)
   }, [])
 
+  if (!payload) {
+    return (
+      <div className="app app-loading">
+        <p>加载方案模板…</p>
+      </div>
+    )
+  }
+
   return (
     <div className="app">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="application/json,.json"
-        style={{ display: 'none' }}
-        onChange={handleFileSelected}
-      />
-
       <TopBar
         rocketType={rocketType}
-        onRocketTypeChange={handleRocketTypeChange}
+        schemeName={schemeName}
+        user={user}
         loading={loading}
-        onLoad={handleLoad}
+        onOpenScheme={() => setSchemeModalOpen(true)}
         onSave={handleSave}
         onCalculate={() => runRequest('calculate')}
         onOptimize={() => runRequest('optimize')}
         onOpenOptimConfig={() => setOptimModalOpen(true)}
         onAbort={handleAbort}
+        onLogin={() => setLoginModalOpen(true)}
+        onLogout={handleLogout}
+      />
+
+      <LoginModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onSuccess={setUser}
+      />
+
+      <SchemeModal
+        open={schemeModalOpen}
+        user={user}
+        onClose={() => setSchemeModalOpen(false)}
+        onSelect={handleSchemeSelect}
+      />
+
+      <SaveSchemeModal
+        open={saveModalOpen}
+        defaultName={schemeName}
+        onClose={() => setSaveModalOpen(false)}
+        onSave={handleSaveToServer}
       />
 
       <OptimConfigModal

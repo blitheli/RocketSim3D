@@ -1,0 +1,6 @@
+[
+  { "type": "CZ-2D", "name": "SSO 500km", "file": "CZ2D_SSO_260601.json" },
+  { "type": "CZ-2D", "name": "LEO", "file": "CZ2D_LEO_260527.json" },
+  { "type": "CZ-4B", "name": "SSO 1000km", "file": "CZ4B_SSO_260519.json" },
+  { "type": "CZ-4C", "name": "SSO 700km", "file": "CZ4C_SSO_260520.json" }
+]
