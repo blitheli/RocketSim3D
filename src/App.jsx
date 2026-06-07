@@ -8,8 +8,10 @@ import Cesium3D from './components/Cesium3D'
 import TrajectoryCharts from './components/charts/TrajectoryCharts'
 import {
   clonePayload,
+  DEFAULT_SCHEME,
   getRocketPanel,
   getRocketType,
+  getSchemeName,
 } from './data/rockets'
 import {
   abortTrajectoryRequest,
@@ -27,7 +29,6 @@ import {
 
 export default function App() {
   const [payload, setPayload] = useState(null)
-  const [schemeName, setSchemeName] = useState('')
   const [loading, setLoading] = useState(false)
   const [optimModalOpen, setOptimModalOpen] = useState(false)
   const [schemeModalOpen, setSchemeModalOpen] = useState(false)
@@ -35,6 +36,7 @@ export default function App() {
   const [saveModalOpen, setSaveModalOpen] = useState(false)
   const [apiResult, setApiResult] = useState(null)
   const [user, setUser] = useState(() => getStoredUser())
+  const [loadError, setLoadError] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -46,9 +48,12 @@ export default function App() {
         const data = await fetchTemplate(first.file)
         if (cancelled) return
         setPayload(clonePayload(data))
-        setSchemeName(`${first.type} ${first.name}`)
+        setLoadError(null)
       } catch (err) {
         console.error(err.message || '加载默认模板失败')
+        if (cancelled) return
+        setPayload(clonePayload(DEFAULT_SCHEME.payload))
+        setLoadError('本地服务未启动，已加载内置模板。保存/打开方案需先运行 npm run server')
       }
     }
     init()
@@ -65,10 +70,10 @@ export default function App() {
     [apiResult],
   )
   const shiXuTable = useMemo(() => extractShiXuTable(apiResult), [apiResult])
+  const schemeName = getSchemeName(payload)
 
-  const handleSchemeSelect = useCallback(({ name, payload: nextPayload }) => {
+  const handleSchemeSelect = useCallback((nextPayload) => {
     setPayload(nextPayload)
-    setSchemeName(name)
     setApiResult(null)
   }, [])
 
@@ -90,8 +95,12 @@ export default function App() {
   }, [user, payload])
 
   const handleSaveToServer = useCallback(async (name) => {
-    await saveUserScheme(name, payload)
-    setSchemeName(name)
+    const next = clonePayload(payload)
+    if (next.RocketInput) {
+      next.RocketInput.Name = name
+    }
+    await saveUserScheme(name, next)
+    setPayload(next)
   }, [payload])
 
   const handleLogout = useCallback(() => {
@@ -101,15 +110,18 @@ export default function App() {
 
   const runRequest = useCallback(async (mode) => {
     if (!payload) return
+    const runProfiles = mode === 'optimize'
+    const requestPayload = { ...payload, RunProfiles: runProfiles }
+    setPayload(requestPayload)
     setLoading(true)
     try {
       const result =
         mode === 'optimize'
-          ? await optimizeTrajectory(payload)
-          : await calculateTrajectory(payload)
+          ? await optimizeTrajectory(requestPayload)
+          : await calculateTrajectory(requestPayload)
 
       setApiResult(result)
-      setPayload((prev) => mergeOptimizedPayload(prev, result))
+      setPayload((prev) => mergeOptimizedPayload({ ...prev, RunProfiles: runProfiles }, result))
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error(error.message || '请求失败')
@@ -134,6 +146,11 @@ export default function App() {
 
   return (
     <div className="app">
+      {loadError && (
+        <div className="app-banner app-banner-warn" role="status">
+          {loadError}
+        </div>
+      )}
       <TopBar
         rocketType={rocketType}
         schemeName={schemeName}

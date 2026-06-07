@@ -11,7 +11,18 @@ const router = Router()
 router.get('/', (req, res) => {
   try {
     const index = JSON.parse(readFileSync(resolve(TEMPLATES_DIR, 'index.json'), 'utf-8'))
-    res.json(index)
+    const templates = index.map((entry) => {
+      try {
+        const data = JSON.parse(readFileSync(resolve(TEMPLATES_DIR, entry.file), 'utf-8'))
+        return {
+          ...entry,
+          name: data.RocketInput?.Name ?? entry.file,
+        }
+      } catch {
+        return { ...entry, name: entry.file }
+      }
+    })
+    res.json(templates)
   } catch {
     res.status(500).json({ error: '无法读取模板列表' })
   }

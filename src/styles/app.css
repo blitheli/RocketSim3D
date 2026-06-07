@@ -620,7 +620,7 @@
   margin-bottom: 12px;
   border: 1px dashed var(--border);
   border-radius: var(--radius);
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text-muted);
   line-height: 1.5;
 }
@@ -743,6 +743,72 @@
 
 .optim-table input[type='checkbox'] {
   width: auto;
+}
+
+.profile-optim .group-box-body {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.profile-optim-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-optim-type {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.profile-optim-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.profile-optim-params {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
+.profile-optim-params .field-label {
+  flex: 0 0 5.5em;
+}
+
+.optim-table-caption {
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.profile-optim-results {
+  margin-top: 12px;
+}
+
+.optim-readonly {
+  color: var(--text-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.profile-optim-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-top: 12px;
+  padding: 8px 10px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.optim-table select {
+  min-width: 6em;
+  padding: 2px 4px;
+  font-size: 13px;
 }
 
 .charts-panel {
@@ -1076,4 +1142,15 @@
   justify-content: center;
   min-height: 100vh;
   color: var(--text-muted);
+}
+
+.app-banner {
+  padding: 8px 14px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.app-banner-warn {
+  color: #ffd180;
+  background: rgba(255, 152, 0, 0.12);
 }

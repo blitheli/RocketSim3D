@@ -14,20 +14,21 @@ RocketSim3D 是火箭弹道仿真与三维可视化 Web 应用：
 
 ## 技术栈
 
-| 类别 | 选型 |
-| --- | --- |
-| 框架 | React 19 + Vite 8（JS/JSX，非 TypeScript） |
-| 曲线 | ECharts 5 |
-| 3D | CesiumJS + `vite-plugin-cesium` |
-| 样式 | 纯 CSS（`src/styles/theme.css`、`app.css`） |
-| 状态 | React `useState` / `useMemo`，无 Redux |
-| 本地后端 | Express（`:3001`），JWT + JSON 文件存储 |
+
+| 类别   | 选型                                      |
+| ---- | --------------------------------------- |
+| 框架   | React 19 + Vite 8（JS/JSX，非 TypeScript）  |
+| 曲线   | ECharts 5                               |
+| 3D   | CesiumJS + `vite-plugin-cesium`         |
+| 样式   | 纯 CSS（`src/styles/theme.css`、`app.css`） |
+| 状态   | React `useState` / `useMemo`，无 Redux    |
+| 本地后端 | Express（`:3001`），JWT + JSON 文件存储        |
+
 
 ## 目录结构
 
 ```
 RocketSim3D/
-├── DDJS/                    # 原始示例弹道 JSON（参考/备份，运行时不再直接 import）
 ├── public/
 │   ├── models/              # GLB 火箭模型（CZ-2D.glb 等）
 │   └── templates/           # 模板方案 JSON + index.json 索引
@@ -104,16 +105,18 @@ TrajectoryCharts / ShiXuTable / Cesium3D
 
 ## 本地后端 API（Express :3001）
 
-| 方法 | 路径 | 说明 | 认证 |
-| --- | --- | --- | --- |
-| POST | /auth/register | 注册 | 无 |
-| POST | /auth/login | 登录，返回 JWT | 无 |
-| GET | /templates | 模板列表（读 `public/templates/index.json`） | 无 |
-| GET | /templates/:filename | 获取模板 JSON | 无 |
-| GET | /schemes | 当前用户方案列表 | JWT |
-| GET | /schemes/:id | 获取用户方案详情 | JWT |
-| POST | /schemes | 保存方案 | JWT |
-| DELETE | /schemes/:id | 删除方案 | JWT |
+
+| 方法     | 路径                   | 说明                                    | 认证  |
+| ------ | -------------------- | ------------------------------------- | --- |
+| POST   | /auth/register       | 注册                                    | 无   |
+| POST   | /auth/login          | 登录，返回 JWT                             | 无   |
+| GET    | /templates           | 模板列表（读 `public/templates/index.json`） | 无   |
+| GET    | /templates/:filename | 获取模板 JSON                             | 无   |
+| GET    | /schemes             | 当前用户方案列表                              | JWT |
+| GET    | /schemes/:id         | 获取用户方案详情                              | JWT |
+| POST   | /schemes             | 保存方案                                  | JWT |
+| DELETE | /schemes/:id         | 删除方案                                  | JWT |
+
 
 开发时 Vite 将 `/auth`、`/templates`、`/schemes` 代理到 `localhost:3001`。
 
@@ -140,26 +143,30 @@ TrajectoryCharts / ShiXuTable / Cesium3D
 
 ### 响应关键字段
 
-| 字段 | 用途 |
-| --- | --- |
-| `DicAllData` | 全程弹道序列（曲线数据源） |
-| `DicKeyData` | 特征点弹道（特征点表格数据源） |
-| `DicShiXu` | 飞行时序/段边界 |
-| `DicZJLD` | 子级落点 |
-| `Profiles` | 优化后更新的 Controls/Results |
+
+| 字段           | 用途                      |
+| ------------ | ----------------------- |
+| `DicAllData` | 全程弹道序列（曲线数据源）           |
+| `DicKeyData` | 特征点弹道（特征点表格数据源）         |
+| `DicShiXu`   | 飞行时序/段边界                |
+| `DicZJLD`    | 子级落点                    |
+| `Profiles`   | 优化后更新的 Controls/Results |
+
 
 ### DicAllData 字段映射（已在 adapt.js 实现）
 
-| 曲线 | 字段 |
-| --- | --- |
-| 时间 | `tt` |
-| 动压 | `q` |
-| 高度 | `h` |
-| 速度 | `V` |
-| 轴向过载 | `nx` |
-| 质量 | `mass` |
-| 推力 | `Fx` |
+
+| 曲线      | 字段               |
+| ------- | ---------------- |
+| 时间      | `tt`             |
+| 动压      | `q`              |
+| 高度      | `h`              |
+| 速度      | `V`              |
+| 轴向过载    | `nx`             |
+| 质量      | `mass`           |
+| 推力      | `Fx`             |
 | 经度 / 纬度 | `Lambda` / `d_B` |
+
 
 ### 特征点表格（extractShiXuTable）
 
@@ -175,7 +182,7 @@ TrajectoryCharts / ShiXuTable / Cesium3D
 
 - 型号元数据：`src/data/rockets.js` → `ROCKET_TYPES`、`ROCKET_PANELS`
 - **运行时模板**：`public/templates/index.json` + 对应 JSON 文件
-- 原始参考 JSON：`DDJS/CZ-2D/`、`DDJS/CZ-4B/`、`DDJS/CZ-4C/`（新增模板时同步复制到 `public/templates/` 并更新 `index.json`）
+- 新增模板：在 `public/templates/` 添加 JSON 并更新 `index.json`
 - 时序/级/质量表字段：各型号 Panel 内硬编码（`src/components/rockets/CZ2DPanel.jsx` 等）
 - 新增型号时：同步更新 `ROCKET_TYPES`、`ROCKET_PANELS`、新建 Panel 组件，并添加模板 JSON
 
@@ -203,22 +210,24 @@ npm run preview
 3. **参数表单**：新字段在对应 `params/*.jsx` 或 `rockets/*Panel.jsx` 中直接渲染；发射点选项见 `BasicParams.jsx` 内 `LAUNCH_SITES`。
 4. **API 适配**：新曲线或表格列在 `adapt.js` 扩展，不要在组件内硬编码字段名。
 5. **样式**：使用 `theme.css` 中的 CSS 变量（`--accent`、`--bg-panel` 等），保持暗色工程风。
-6. **不修改**：`DDJS/` 下示例 JSON 除非用户要求；计划文件 `.cursor/plans/` 除非用户要求。
+6. **不修改**：计划文件 `.cursor/plans/` 除非用户要求。
 7. **用户数据**：`server/data/` 含运行时生成的用户与方案，勿提交测试账户到版本库（可考虑 `.gitignore`）。
 
 ## 常见任务指引
 
-| 任务 | 主要文件 |
-| --- | --- |
-| 新增曲线 Tab | `adapt.js`（buildChartConfigs）、`TrajectoryCharts.jsx` |
-| 新增特征点表格列 | `adapt.js`（`SHIXU_FIELD_DEFS`） |
-| 新增参数项 | `params/*.jsx`、`rockets/*Panel.jsx` |
-| 新增火箭型号 | `rockets.js`、新建 `rockets/*Panel.jsx`、`public/templates/` |
-| 新增模板方案 | `public/templates/` JSON + `index.json` |
-| 调整弹道 API 调用 | `api/trajectory.js`、`App.jsx` |
+
+| 任务          | 主要文件                                                                        |
+| ----------- | --------------------------------------------------------------------------- |
+| 新增曲线 Tab    | `adapt.js`（buildChartConfigs）、`TrajectoryCharts.jsx`                        |
+| 新增特征点表格列    | `adapt.js`（`SHIXU_FIELD_DEFS`）                                              |
+| 新增参数项       | `params/*.jsx`、`rockets/*Panel.jsx`                                         |
+| 新增火箭型号      | `rockets.js`、新建 `rockets/*Panel.jsx`、`public/templates/`                    |
+| 新增模板方案      | `public/templates/` JSON + `index.json`                                     |
+| 调整弹道 API 调用 | `api/trajectory.js`、`App.jsx`                                               |
 | 用户登录/方案 API | `server/auth.js`、`server/schemes.js`、`src/api/auth.js`、`src/api/schemes.js` |
-| 3D 轨迹 | `Cesium3D.jsx` |
-| 跨域/代理 | `vite.config.js` |
+| 3D 轨迹       | `Cesium3D.jsx`                                                              |
+| 跨域/代理       | `vite.config.js`                                                            |
+
 
 ## 测试建议
 
@@ -227,11 +236,11 @@ npm run preview
 ```bash
 curl -X POST "http://astrox.cn:8764/Rocket/TrajectoryOptim" \
   -H "Content-Type: application/json" \
-  -d "@DDJS/CZ-2D/CZ2D_SSO_260601.json"
+  -d "@public/templates/CZ2D_SSO_260601.json"
 ```
 
 - 本地后端模板列表：`curl http://localhost:3001/templates`
-- UI：启动 server + dev，打开 http://localhost:5173，「打开方案」选模板，点击「计算」应出现 ECharts 曲线与 Cesium 弹道
+- UI：启动 server + dev，打开 [http://localhost:5173，「打开方案」选模板，点击「计算」应出现](http://localhost:5173，「打开方案」选模板，点击「计算」应出现) ECharts 曲线与 Cesium 弹道
 - 快速验证弹道（不优化）：请求体设 `RunProfiles: false`、`Profiles: []`
 - 检查 `IsSuccess` 与 `Message`；失败时查看 `Profiles[].OptimTerminationType`
 
@@ -252,11 +261,13 @@ curl -X POST "http://astrox.cn:8764/Rocket/TrajectoryOptim" \
 
 ### 服务与端口
 
-| 服务 | 命令 | URL |
-| --- | --- | --- |
-| Express 本地后端 | `npm run server` | http://localhost:3001 |
-| Vite 开发服务器 | `npm run dev` | http://localhost:5173 |
+
+| 服务            | 命令                  | URL                                                          |
+| ------------- | ------------------- | ------------------------------------------------------------ |
+| Express 本地后端  | `npm run server`    | [http://localhost:3001](http://localhost:3001)               |
+| Vite 开发服务器    | `npm run dev`       | [http://localhost:5173](http://localhost:5173)               |
 | AstroX 弹道 API | 无需本地启动；开发时经 Vite 代理 | `POST /api/Rocket/TrajectoryOptim` → `http://astrox.cn:8764` |
+
 
 端到端联调需要：Express 后端（登录/方案）、外网 `astrox.cn:8764`（弹道计算）、默认 OSM 瓦片 `tile.openstreetmap.org`。
 
@@ -291,12 +302,13 @@ tmux new-session -d -s vite-dev-server -c /workspace -- npm run dev
 
 ### 快速验证
 
-- 弹道 API：`curl -X POST "http://localhost:5173/api/Rocket/TrajectoryOptim" -H "Content-Type: application/json" -d "@DDJS/CZ-2D/CZ2D_SSO_260601.json"`
+- 弹道 API：`curl -X POST "http://localhost:5173/api/Rocket/TrajectoryOptim" -H "Content-Type: application/json" -d "@public/templates/CZ2D_SSO_260601.json"`
 - 模板列表：`curl http://localhost:3001/templates`
-- UI：打开 http://localhost:5173，「打开方案」→ 选模板 →「计算」
+- UI：打开 [http://localhost:5173，「打开方案」→](http://localhost:5173，「打开方案」→) 选模板 →「计算」
 
 ### 可选环境变量
 
 - `VITE_CESIUM_ION_TOKEN`：启用 Cesium Ion 地形；未设置时使用 OpenStreetMap 底图
 - `JWT_SECRET`：Express JWT 密钥（默认开发用内置值，生产务必设置）
 - `PORT`：Express 监听端口（默认 3001）
+

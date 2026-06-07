@@ -3,20 +3,21 @@
 火箭弹道仿真与三维可视化
 
 ## UI主要功能
+
 - 火箭弹道仿真计算，可选择不同类型的火箭，在界面上输入相应的参数，进行计算和优化设计
 - 弹道曲线显示功能，弹道计算后，可显示关键弹道曲线,例如：时间-动压；时间-高度（速度）；时间-过载等典型参数曲线
 - 3D窗口弹道轨迹显示,使用three.js或CesiumJS显示计算完成后的弹道3D曲线
 
 ## 火箭弹道仿真计算
+
 - 可进行世界上不同类型的火箭弹道计算,用户可选择,每个弹道的输入为一个json文件,描述了详细的弹道参数
 - UI页面显示对应的火箭3D模型(gltf/glb格式)及相应的弹道参数
-- 使用webapi方式(http://astrox.cn:8764/Rocket/TrajectoryOptim)进行弹道优化或计算,返回的也为json,包含了完整的弹道输出参数
-- 可参考skill,地址:https://github.com/blitheli/astrox-skills, skills文件夹下rocket-trajectory-optim
-- 目前以3个火箭为例,相应的例子文件参考DDJS文件夹下(仅json文件)
-- 页面参数可部分参考:DDJS/rocket.png
+- 使用webapi方式([http://astrox.cn:8764/Rocket/TrajectoryOptim)进行弹道优化或计算,返回的也为json,包含了完整的弹道输出参数](http://astrox.cn:8764/Rocket/TrajectoryOptim)进行弹道优化或计算,返回的也为json,包含了完整的弹道输出参数)
+- 可参考skill,地址:[https://github.com/blitheli/astrox-skills](https://github.com/blitheli/astrox-skills), skills文件夹下rocket-trajectory-optim
+- 目前以 3 个火箭为例，示例方案见 `public/templates/` 下 JSON 文件
 - 除了公用参数外,飞行时序单独一个GroupBox,火箭各级参数应组合在一起，例如一级: 总质量,推进剂，发动机参数...
 
 ## 弹道曲线显示功能
-- 默认显示的曲线: 时间-动压, 时间-高度(速度)双坐标, 时间-轴向过载, 时间-质量，时间-推力等
-- 在设计时,可使用skill调用DDJS中的例子返回详细的参数进行测试
 
+- 默认显示的曲线: 时间-动压, 时间-高度(速度)双坐标, 时间-轴向过载, 时间-质量，时间-推力等
+- 在设计时,可使用 skill 调用 `public/templates/` 中的例子返回详细参数进行测试

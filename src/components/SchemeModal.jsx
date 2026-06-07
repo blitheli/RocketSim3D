@@ -69,11 +69,7 @@ export default function SchemeModal({ open, user, onClose, onSelect }) {
     try {
       setLoading(true)
       const payload = await fetchTemplate(tpl.file)
-      onSelect({
-        name: `${tpl.type} ${tpl.name}`,
-        payload: clonePayload(payload),
-        source: 'template',
-      })
+      onSelect(clonePayload(payload))
       onClose()
     } catch (err) {
       setError(err.message || '加载模板失败')
@@ -86,12 +82,7 @@ export default function SchemeModal({ open, user, onClose, onSelect }) {
     try {
       setLoading(true)
       const data = await loadUserScheme(scheme.id)
-      onSelect({
-        name: data.name,
-        payload: clonePayload(data.payload),
-        source: 'user',
-        id: data.id,
-      })
+      onSelect(clonePayload(data.payload))
       onClose()
     } catch (err) {
       setError(err.message || '加载方案失败')

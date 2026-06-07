@@ -4,7 +4,14 @@ import Field from './Field'
 const LAUNCH_SITES = [
   { id: 'ty', label: '太原 (ty)' },
   { id: 'xc', label: '西昌 (xc)' },
-  { id: 'jqs', label: '酒泉 (jqs)' },
+  { id: 'jq', label: '酒泉 (jq)' },
+  { id: 'wc', label: '文昌 (wc)' },
+  { id: 'SLC40', label: '卡角SLC40' },
+  { id: 'Vandenberg', label: '范登堡' },
+  { id: 'Baikonur', label: '拜科努尔' },
+  { id: 'Plesetsk', label: '普列谢茨克' },
+  { id: 'Kourou', label: '库鲁' },
+  { id: 'Zhongzidao', label: '种子岛' },
   { id: 'custom', label: '自定义坐标' },
 ]
 
@@ -14,14 +21,6 @@ export default function BasicParams({ input, onChange }) {
 
   return (
     <GroupBox title="基本参数" className="basic-params">
-      <Field label="方案名称" full>
-        <input
-          type="text"
-          value={input.Name ?? ''}
-          onChange={(e) => onChange('Name', e.target.value, 'string')}
-        />
-      </Field>
-
       <Field label="发射点">
         <select
           value={input.Name_FaSheDian ?? 'ty'}

@@ -2,7 +2,7 @@
   "RocketInput": {
     "$type": "CZ-4C",
     "Name": "CZ4C_SSO_260520",
-    "Text": "CZ-4C SSO(700km) DDJS. 大整流罩1650kg, 运载能力: 3300kg",
+    "Text": "CZ-4C SSO(700km). 大整流罩1650kg, 运载能力: 3300kg",
     "Text2": "至少剩余推进剂(灌注量+安全余量):一级:1400kg; 二级:200kg; 三级: 200:kg",
     "Text3": "CZ-4C状态,三级推进剂可以少装",
     "Name_FaSheDian": "ty",

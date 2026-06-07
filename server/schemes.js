@@ -40,7 +40,11 @@ router.post('/', authRequired, (req, res) => {
   const dir = getUserDir(req.user.id)
   const id = randomUUID()
   const type = payload.RocketInput?.$type || 'Unknown'
-  const scheme = { id, name, type, updatedAt: new Date().toISOString(), payload }
+  const nextPayload = structuredClone(payload)
+  if (nextPayload.RocketInput) {
+    nextPayload.RocketInput.Name = name
+  }
+  const scheme = { id, name, type, updatedAt: new Date().toISOString(), payload: nextPayload }
   writeFileSync(resolve(dir, `${id}.json`), JSON.stringify(scheme, null, 2), 'utf-8')
   res.json({ id, name, type, updatedAt: scheme.updatedAt })
 })
