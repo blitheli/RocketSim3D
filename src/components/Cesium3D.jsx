@@ -151,7 +151,15 @@ function getLaunchPosition(site) {
   const sites = {
     ty: { lon: 112.6, lat: 38.8, alt: 1500 },
     xc: { lon: 102.0, lat: 28.2, alt: 1800 },
+    jq: { lon: 100.3, lat: 40.9, alt: 1000 },
     jqs: { lon: 100.3, lat: 40.9, alt: 1000 },
+    wc: { lon: 110.95, lat: 19.61, alt: 0 },
+    SLC40: { lon: -80.604, lat: 28.608, alt: 0 },
+    Vandenberg: { lon: -120.611, lat: 34.632, alt: 0 },
+    Baikonur: { lon: 63.342, lat: 45.964, alt: 100 },
+    Plesetsk: { lon: 40.357, lat: 62.928, alt: 200 },
+    Kourou: { lon: -52.768, lat: 5.239, alt: 0 },
+    Zhongzidao: { lon: 131.079, lat: 30.398, alt: 0 },
   }
   return sites[site] ?? sites.ty
 }

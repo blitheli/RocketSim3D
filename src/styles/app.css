@@ -778,6 +778,45 @@
   gap: 12px;
 }
 
+.profile-optim-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-optim-tab {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.profile-optim-tab:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.profile-optim-tab.is-active {
+  color: var(--accent);
+  background: rgba(47, 111, 237, 0.12);
+  border-color: rgba(47, 111, 237, 0.35);
+}
+
+.profile-optim-tabs-panel {
+  min-width: 0;
+}
+
 .profile-optim-meta {
   display: flex;
   flex-direction: column;

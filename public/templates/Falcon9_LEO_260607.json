@@ -1,7 +1,7 @@
 {
   "RocketInput": {
     "$type": "Falcon9",
-    "Name": "Falon9 LEO 300km 53°",
+    "Name": "Falcon9 LEO 300km 53°",
     "Text": "使用两个优化文件.第1个优化:目标轨道,一次关机,150x300km;第2个微分修正法:二次点火进入300km圆轨道",
     "Text2": "偏心率不为0,omg0取值158是根据发射点和方位角综合确定的，保证二级一次关机后刚好在近地点附近,运载能力16t,二级还剩余约5t燃料",
     "Name_FaSheDian": "SLC40",
