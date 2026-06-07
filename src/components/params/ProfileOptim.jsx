@@ -1,7 +1,7 @@
 import GroupBox from './GroupBox'
 import Field from './Field'
 
-const GOAL_OPTIONS = ['Maximize', 'Minimize']
+const GOAL_OPTIONS = ['Maximize', 'Minimize', 'Equality']
 
 function updateProfile(profiles, profileIndex, field, value) {
   const next = structuredClone(profiles)
@@ -56,7 +56,7 @@ export default function ProfileOptim({ profiles, onChange }) {
 
   return (
     <>
-      <GroupBox title={`优化配置 - ${profile.Name ?? 'Profile'}`} className="profile-optim">
+      <GroupBox title={`${profile.Name ?? 'Profile'}`} className="profile-optim">
         <div className="profile-optim-meta">
           <div className="profile-optim-type">{profile.$type ?? 'Optimizer'}</div>
           {profile.Text ? <div className="profile-optim-desc">{profile.Text}</div> : null}
@@ -124,10 +124,10 @@ export default function ProfileOptim({ profiles, onChange }) {
               <th>启用</th>
               <th>名称</th>
               <th>对象</th>
-              <th>当前值</th>
-              <th>下界</th>
-              <th>上界</th>
-              <th>Scale</th>
+              <th className="optim-col-num">当前值</th>
+              <th className="optim-col-num-sm">下界</th>
+              <th className="optim-col-num-sm">上界</th>
+              <th className="optim-col-num-sm">Scale</th>
             </tr>
           </thead>
           <tbody>
@@ -144,7 +144,7 @@ export default function ProfileOptim({ profiles, onChange }) {
                 </td>
                 <td>{control.Name}</td>
                 <td>{control.Object}</td>
-                <td>
+                <td className="optim-col-num">
                   <input
                     type="number"
                     step="0.0001"
@@ -154,7 +154,7 @@ export default function ProfileOptim({ profiles, onChange }) {
                     }
                   />
                 </td>
-                <td>
+                <td className="optim-col-num-sm">
                   <input
                     type="number"
                     step="0.0001"
@@ -164,7 +164,7 @@ export default function ProfileOptim({ profiles, onChange }) {
                     }
                   />
                 </td>
-                <td>
+                <td className="optim-col-num-sm">
                   <input
                     type="number"
                     step="0.0001"
@@ -174,7 +174,7 @@ export default function ProfileOptim({ profiles, onChange }) {
                     }
                   />
                 </td>
-                <td>
+                <td className="optim-col-num-sm">
                   <input
                     type="number"
                     value={control.Scale ?? 1}
@@ -198,9 +198,9 @@ export default function ProfileOptim({ profiles, onChange }) {
               <th>名称</th>
               <th>目标</th>
               <th>对象</th>
-              <th>当前值</th>
-              <th>期望值</th>
-              <th>Scale</th>
+              <th className="optim-col-num">当前值</th>
+              <th className="optim-col-num">期望值</th>
+              <th className="optim-col-num-sm">Scale</th>
               <th>偏差 DltFG</th>
             </tr>
           </thead>
@@ -230,7 +230,7 @@ export default function ProfileOptim({ profiles, onChange }) {
                   </select>
                 </td>
                 <td>{result.Object}</td>
-                <td>
+                <td className="optim-col-num">
                   <input
                     type="number"
                     step="0.0001"
@@ -240,7 +240,7 @@ export default function ProfileOptim({ profiles, onChange }) {
                     }
                   />
                 </td>
-                <td>
+                <td className="optim-col-num">
                   <input
                     type="number"
                     step="0.0001"
@@ -250,7 +250,7 @@ export default function ProfileOptim({ profiles, onChange }) {
                     }
                   />
                 </td>
-                <td>
+                <td className="optim-col-num-sm">
                   <input
                     type="number"
                     value={result.Scale ?? 1}

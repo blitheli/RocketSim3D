@@ -1,8 +1,8 @@
 {
   "RocketInput": {
     "$type": "CZ-2D",
-    "Name": "CZ2D_LEO_Optim",
-    "Text": "500km,35°倾角，运载能力约2.5t",
+    "Name": "CZ2D LEO 500km 35°",
+    "Text": "500km,35°倾角,运载能力约2.5t",
     "Text2": "至少剩余推进剂(灌注量+安全余量):一级:1400kg; 二级:500kg",
     "Name_FaSheDian": "xc",
     "A0": 112.0,

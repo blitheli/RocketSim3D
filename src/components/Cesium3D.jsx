@@ -105,10 +105,10 @@ export default function Cesium3D({ trajectoryPoints, rocketType, launchSite }) {
         name: '弹道轨迹',
         polyline: {
           positions,
-          width: 4,
+          width: 6,
           material: new Cesium.PolylineGlowMaterialProperty({
-            glowPower: 0.2,
-            color: Cesium.Color.CYAN,
+            glowPower: 0.15,
+            color: Cesium.Color.fromCssColorString('#C71585'),
           }),
         },
       })

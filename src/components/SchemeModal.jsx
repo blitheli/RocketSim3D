@@ -140,7 +140,7 @@ export default function SchemeModal({ open, user, onClose, onSelect }) {
                         onClick={() => handleTemplate(tpl)}
                         disabled={loading}
                       >
-                        <span className="scheme-item-name">{tpl.name}</span>
+                        <span className="scheme-item-name">{tpl.name || tpl.file}</span>
                         <span className="scheme-item-meta">模板</span>
                       </button>
                     </li>
@@ -183,7 +183,9 @@ export default function SchemeModal({ open, user, onClose, onSelect }) {
               )}
             </section>
           ) : (
-            <p className="modal-empty">登录后可查看和保存个人方案</p>
+            <section className="scheme-login-hint" aria-live="polite">
+              <p>登录后可查看和保存个人方案</p>
+            </section>
           )}
         </div>
       </div>

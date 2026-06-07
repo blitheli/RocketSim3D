@@ -16,10 +16,10 @@ router.get('/', (req, res) => {
         const data = JSON.parse(readFileSync(resolve(TEMPLATES_DIR, entry.file), 'utf-8'))
         return {
           ...entry,
-          name: data.RocketInput?.Name ?? entry.file,
+          name: entry.name ?? data.RocketInput?.Name ?? entry.file,
         }
       } catch {
-        return { ...entry, name: entry.file }
+        return { ...entry, name: entry.name ?? entry.file }
       }
     })
     res.json(templates)

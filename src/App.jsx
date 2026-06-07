@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import TopBar from './components/TopBar'
 import OptimConfigModal from './components/OptimConfigModal'
+import OptimWaitingOverlay from './components/OptimWaitingOverlay'
+import OptimResultModal from './components/OptimResultModal'
 import LoginModal from './components/LoginModal'
 import SchemeModal from './components/SchemeModal'
 import SaveSchemeModal from './components/SaveSchemeModal'
@@ -16,6 +18,7 @@ import {
 import {
   abortTrajectoryRequest,
   calculateTrajectory,
+  getOptimizedControlNames,
   mergeOptimizedPayload,
   optimizeTrajectory,
 } from './api/trajectory'
@@ -30,6 +33,10 @@ import {
 export default function App() {
   const [payload, setPayload] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [optimizing, setOptimizing] = useState(false)
+  const [optimResultOpen, setOptimResultOpen] = useState(false)
+  const [optimResultProfiles, setOptimResultProfiles] = useState(null)
+  const [optimizedFields, setOptimizedFields] = useState(() => new Set())
   const [optimModalOpen, setOptimModalOpen] = useState(false)
   const [schemeModalOpen, setSchemeModalOpen] = useState(false)
   const [loginModalOpen, setLoginModalOpen] = useState(false)
@@ -75,6 +82,16 @@ export default function App() {
   const handleSchemeSelect = useCallback((nextPayload) => {
     setPayload(nextPayload)
     setApiResult(null)
+    setOptimizedFields(new Set())
+  }, [])
+
+  const clearOptimizedField = useCallback((field) => {
+    setOptimizedFields((prev) => {
+      if (!prev.has(field)) return prev
+      const next = new Set(prev)
+      next.delete(field)
+      return next
+    })
   }, [])
 
   const handleSave = useCallback(() => {
@@ -114,6 +131,13 @@ export default function App() {
     const requestPayload = { ...payload, RunProfiles: runProfiles }
     setPayload(requestPayload)
     setLoading(true)
+    if (mode === 'optimize') {
+      setOptimizing(true)
+      setOptimResultOpen(false)
+      setOptimResultProfiles(null)
+    } else {
+      setOptimizedFields(new Set())
+    }
     try {
       const result =
         mode === 'optimize'
@@ -121,19 +145,34 @@ export default function App() {
           : await calculateTrajectory(requestPayload)
 
       setApiResult(result)
-      setPayload((prev) => mergeOptimizedPayload({ ...prev, RunProfiles: runProfiles }, result))
+      setPayload((prev) =>
+        mergeOptimizedPayload({ ...prev, RunProfiles: runProfiles }, result, {
+          applyControls: runProfiles,
+        }),
+      )
+      if (mode === 'optimize') {
+        setOptimResultProfiles(result.Profiles ?? [])
+        setOptimizedFields(getOptimizedControlNames(result.Profiles ?? []))
+        setOptimResultOpen(true)
+      }
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error(error.message || '请求失败')
       }
     } finally {
       setLoading(false)
+      setOptimizing(false)
     }
   }, [payload])
 
   const handleAbort = useCallback(() => {
     abortTrajectoryRequest()
     setLoading(false)
+    setOptimizing(false)
+  }, [])
+
+  const handleOptimResultClose = useCallback(() => {
+    setOptimResultOpen(false)
   }, [])
 
   if (!payload) {
@@ -191,10 +230,26 @@ export default function App() {
         payload={payload}
         onChange={setPayload}
         onClose={() => setOptimModalOpen(false)}
+        onOptimize={() => runRequest('optimize')}
+        loading={loading}
+      />
+
+      <OptimWaitingOverlay open={optimizing} />
+
+      <OptimResultModal
+        open={optimResultOpen}
+        profiles={optimResultProfiles}
+        onClose={handleOptimResultClose}
       />
 
       <div className="app-main">
-        <RocketPanel payload={payload} onChange={setPayload} shiXuTable={shiXuTable} />
+        <RocketPanel
+          payload={payload}
+          onChange={setPayload}
+          shiXuTable={shiXuTable}
+          optimizedFields={optimizedFields}
+          onClearOptimizedField={clearOptimizedField}
+        />
         <div className="center-column">
           <Cesium3D
             trajectoryPoints={trajectoryPoints}

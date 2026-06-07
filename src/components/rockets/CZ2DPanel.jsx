@@ -4,6 +4,7 @@ import GroupBox from '../params/GroupBox'
 import Field from '../params/Field'
 import EngineTabs from '../params/EngineTabs'
 import ShiXuTable from '../params/ShiXuTable'
+import OptimInput from '../params/OptimInput'
 import { bindRocketInput } from '../../utils/useRocketInput'
 import { burnConsumption } from '../../utils/remainingFuel'
 
@@ -17,9 +18,17 @@ function fmtRemaining(kg) {
   return kg.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 }
 
-export default function CZ2DPanel({ payload, onChange, shiXuTable }) {
+export default function CZ2DPanel({
+  payload,
+  onChange,
+  shiXuTable,
+  optimizedFields,
+  onClearOptimizedField,
+}) {
   const input = payload.RocketInput
-  const { updateInput, updateEngine } = bindRocketInput(onChange)
+  const { updateInput, updateEngine } = bindRocketInput(onChange, {
+    onFieldEdit: onClearOptimizedField,
+  })
 
   // 一级剩余推进剂 = 一级推进剂 - 一级发动机燃烧消耗推进剂
   const remaining1 = (Number(input.Stage1_FuelMass) || 0) - burnConsumption(input, 'Stage1_Engine', input.Tk_1)
@@ -36,8 +45,8 @@ export default function CZ2DPanel({ payload, onChange, shiXuTable }) {
             {input.Text && <div>{input.Text}</div>}
             {input.Text2 && <div>{input.Text2}</div>}
           </div>
-          <BasicParams input={input} onChange={updateInput} />
-          <OrbitParams input={input} onChange={updateInput} />
+          <BasicParams input={input} onChange={updateInput} optimizedFields={optimizedFields} />
+          <OrbitParams input={input} onChange={updateInput} optimizedFields={optimizedFields} />
           <EngineTabs engines={ENGINE_TABS} input={input} onEngineChange={updateEngine} />
         </div>
 
@@ -78,31 +87,31 @@ export default function CZ2DPanel({ payload, onChange, shiXuTable }) {
           </GroupBox>
           <GroupBox title="飞行时序">
             <Field label="一级工作时间" unit="s">
-              <input type="number" step="0.0001" value={input.Tk_1 ?? 0} onChange={(e) => updateInput('Tk_1', e.target.value)} />
+              <OptimInput field="Tk_1" optimizedFields={optimizedFields} type="number" step="0.0001" value={input.Tk_1 ?? 0} onChange={(e) => updateInput('Tk_1', e.target.value)} />
             </Field>
             <Field label="一二级分离间隔" unit="s">
-              <input type="number" step="0.0001" value={input.Dt_k12f ?? 0} onChange={(e) => updateInput('Dt_k12f', e.target.value)} />
+              <OptimInput field="Dt_k12f" optimizedFields={optimizedFields} type="number" step="0.0001" value={input.Dt_k12f ?? 0} onChange={(e) => updateInput('Dt_k12f', e.target.value)} />
             </Field>
             <Field label="整流罩分离时刻" unit="s">
-              <input type="number" step="0.0001" value={input.Tk_F ?? 0} onChange={(e) => updateInput('Tk_F', e.target.value)} />
+              <OptimInput field="Tk_F" optimizedFields={optimizedFields} type="number" step="0.0001" value={input.Tk_F ?? 0} onChange={(e) => updateInput('Tk_F', e.target.value)} />
             </Field>
             <Field label="二级主机关机" unit="s">
-              <input type="number" step="0.0001" value={input.Tk_2z ?? 0} onChange={(e) => updateInput('Tk_2z', e.target.value)} />
+              <OptimInput field="Tk_2z" optimizedFields={optimizedFields} type="number" step="0.0001" value={input.Tk_2z ?? 0} onChange={(e) => updateInput('Tk_2z', e.target.value)} />
             </Field>
             <Field label="二级游机关机" unit="s">
-              <input type="number" step="0.0001" value={input.Tk_2u ?? 0} onChange={(e) => updateInput('Tk_2u', e.target.value)} />
+              <OptimInput field="Tk_2u" optimizedFields={optimizedFields} type="number" step="0.0001" value={input.Tk_2u ?? 0} onChange={(e) => updateInput('Tk_2u', e.target.value)} />
             </Field>
             <Field label="星箭分离间隔" unit="s">
-              <input type="number" step="0.0001" value={input.Dt_xjfl ?? 0} onChange={(e) => updateInput('Dt_xjfl', e.target.value)} />
+              <OptimInput field="Dt_xjfl" optimizedFields={optimizedFields} type="number" step="0.0001" value={input.Dt_xjfl ?? 0} onChange={(e) => updateInput('Dt_xjfl', e.target.value)} />
             </Field>
             <Field label="二级主俯仰角速率" unit="deg/s">
-              <input type="number" step="0.0001" value={input.PhicxDot_2z ?? 0} onChange={(e) => updateInput('PhicxDot_2z', e.target.value)} />
+              <OptimInput field="PhicxDot_2z" optimizedFields={optimizedFields} type="number" step="0.0001" value={input.PhicxDot_2z ?? 0} onChange={(e) => updateInput('PhicxDot_2z', e.target.value)} />
             </Field>
             <Field label="二级游俯仰角速率" unit="deg/s">
-              <input type="number" step="0.0001" value={input.PhicxDot_2u ?? 0} onChange={(e) => updateInput('PhicxDot_2u', e.target.value)} />
+              <OptimInput field="PhicxDot_2u" optimizedFields={optimizedFields} type="number" step="0.0001" value={input.PhicxDot_2u ?? 0} onChange={(e) => updateInput('PhicxDot_2u', e.target.value)} />
             </Field>
             <Field label="二级偏航角速率" unit="deg/s">
-              <input type="number" step="0.0001" value={input.PsicxDot_2 ?? 0} onChange={(e) => updateInput('PsicxDot_2', e.target.value)} />
+              <OptimInput field="PsicxDot_2" optimizedFields={optimizedFields} type="number" step="0.0001" value={input.PsicxDot_2 ?? 0} onChange={(e) => updateInput('PsicxDot_2', e.target.value)} />
             </Field>
           </GroupBox>
         </aside>

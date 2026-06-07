@@ -1,6 +1,8 @@
 [
-  { "type": "CZ-2D", "file": "CZ2D_SSO_260601.json" },
-  { "type": "CZ-2D", "file": "CZ2D_LEO_260527.json" },
-  { "type": "CZ-4B", "file": "CZ4B_SSO_260519.json" },
-  { "type": "CZ-4C", "file": "CZ4C_SSO_260520.json" }
+  { "type": "CZ-2D", "file": "CZ2D_SSO_260601.json", "name": "CZ2D SSO 500km" },
+  { "type": "CZ-2D", "file": "CZ2D_LEO_260527.json", "name": "CZ2D LEO 500km 35°" },
+  { "type": "CZ-4B", "file": "CZ4B_SSO_260519.json", "name": "CZ4B SSO 1000km" },
+  { "type": "CZ-4C", "file": "CZ4C_SSO_260520.json", "name": "CZ4C SSO 700km" },
+  { "type": "Falcon9", "file": "Falcon9_SSO_260607.json", "name": "Falon9 LEO 300km 53°" }
+
 ]

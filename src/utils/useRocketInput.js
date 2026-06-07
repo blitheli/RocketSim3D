@@ -44,14 +44,29 @@ export function updateEngine(onChange, engineKey, field, value, type = 'number')
 }
 
 /**
+ * 优化写回后，为对应自变量 input 附加高亮 class。
+ * @param {string} fieldKey - RocketInput 字段名
+ * @param {Set<string>|undefined} optimizedFields
+ */
+export function optimInputClass(fieldKey, optimizedFields) {
+  return optimizedFields?.has(fieldKey) ? 'input-optimized' : undefined
+}
+
+/**
  * 绑定 setPayload，供 Panel 解构为 { updateInput, updateEngine } 传给子组件。
  * @param {Function} onChange - setPayload
+ * @param {{ onFieldEdit?: (fieldKey: string) => void }} [options]
  * @returns {{ updateInput: Function, updateEngine: Function }}
  */
-export function bindRocketInput(onChange) {
+export function bindRocketInput(onChange, { onFieldEdit } = {}) {
   return {
-    updateInput: (key, value, type) => updateInput(onChange, key, value, type),
-    updateEngine: (engineKey, field, value, type) =>
-      updateEngine(onChange, engineKey, field, value, type),
+    updateInput: (key, value, type) => {
+      onFieldEdit?.(key)
+      updateInput(onChange, key, value, type)
+    },
+    updateEngine: (engineKey, field, value, type) => {
+      onFieldEdit?.(`${engineKey}.${field}`)
+      updateEngine(onChange, engineKey, field, value, type)
+    },
   }
 }

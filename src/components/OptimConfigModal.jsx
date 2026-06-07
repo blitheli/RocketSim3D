@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import ProfileOptim from './params/ProfileOptim'
 
-export default function OptimConfigModal({ open, payload, onChange, onClose }) {
+export default function OptimConfigModal({ open, payload, onChange, onClose, onOptimize, loading }) {
   useEffect(() => {
     if (!open) return undefined
     const onKeyDown = (e) => {
@@ -40,6 +40,14 @@ export default function OptimConfigModal({ open, payload, onChange, onClose }) {
           )}
         </div>
         <div className="modal-footer">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={onOptimize}
+            disabled={loading}
+          >
+            优化
+          </button>
           <button type="button" className="btn btn-primary" onClick={onClose}>
             确定
           </button>

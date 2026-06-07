@@ -64,13 +64,52 @@ export async function optimizeTrajectory(payload) {
   })
 }
 
-export function mergeOptimizedPayload(originalPayload, apiResult) {
+/** 收集 Profiles 中启用的自变量 Control 名称 */
+export function getOptimizedControlNames(profiles) {
+  const names = new Set()
+  if (!Array.isArray(profiles)) return names
+
+  for (const profile of profiles) {
+    for (const control of profile.Controls ?? []) {
+      if (control?.Use && control.Name) {
+        names.add(control.Name)
+      }
+    }
+  }
+  return names
+}
+
+/** 将 Profiles 中启用的 Controls.CurrentValue 写回 RocketInput 对应字段 */
+function applyProfileControlsToRocketInput(rocketInput, profiles) {
+  const next = { ...rocketInput }
+  if (!Array.isArray(profiles)) return next
+
+  for (const profile of profiles) {
+    for (const control of profile.Controls ?? []) {
+      if (!control?.Use || control.Name == null) continue
+      if (control.CurrentValue !== undefined && control.CurrentValue !== null) {
+        next[control.Name] = control.CurrentValue
+      }
+    }
+  }
+  return next
+}
+
+export function mergeOptimizedPayload(originalPayload, apiResult, options = {}) {
+  const { applyControls = false } = options
+  const profiles = apiResult.Profiles ?? originalPayload.Profiles
+  let rocketInput = {
+    ...originalPayload.RocketInput,
+    ...(apiResult.RocketInput ?? {}),
+  }
+
+  if (applyControls && profiles?.length) {
+    rocketInput = applyProfileControlsToRocketInput(rocketInput, profiles)
+  }
+
   return {
     ...originalPayload,
-    Profiles: apiResult.Profiles ?? originalPayload.Profiles,
-    RocketInput: {
-      ...originalPayload.RocketInput,
-      ...(apiResult.RocketInput ?? {}),
-    },
+    Profiles: profiles,
+    RocketInput: rocketInput,
   }
 }

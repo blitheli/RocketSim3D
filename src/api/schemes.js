@@ -7,11 +7,34 @@ function authHeaders() {
     : { 'Content-Type': 'application/json' }
 }
 
+function formatTemplateFileName(file) {
+  return file.replace(/\.json$/i, '').replace(/_/g, ' ')
+}
+
+async function enrichTemplateNames(entries) {
+  return Promise.all(
+    entries.map(async (entry) => {
+      if (entry.name) return entry
+      try {
+        const payload = await fetchTemplate(entry.file)
+        return {
+          ...entry,
+          name: payload.RocketInput?.Name ?? formatTemplateFileName(entry.file),
+        }
+      } catch {
+        return { ...entry, name: formatTemplateFileName(entry.file) }
+      }
+    }),
+  )
+}
+
 export async function fetchTemplates() {
   const res = await fetch('/templates')
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || '无法加载模板列表')
-  return data
+  if (!Array.isArray(data) || data.length === 0) return data
+  if (data.every((entry) => entry.name)) return data
+  return enrichTemplateNames(data)
 }
 
 export async function fetchTemplate(filename) {

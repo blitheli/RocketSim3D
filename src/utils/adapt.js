@@ -129,6 +129,41 @@ export function extractSummary(apiResult) {
   }
 }
 
+function formatOptimNum(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '-'
+  if (Math.abs(n) > 0 && Math.abs(n) < 0.001) return n.toExponential(4)
+  return n.toLocaleString('zh-CN', { maximumFractionDigits: 6 })
+}
+
+/** 优化完成后各 Profile 的结果简介（仅含启用的 Controls 及其优化值） */
+export function buildOptimProfileSummaries(profiles) {
+  if (!Array.isArray(profiles)) return []
+
+  return profiles.map((profile) => ({
+    name: profile.Name ?? 'Profile',
+    text: profile.Text ?? '',
+    terminationType: profile.OptimTerminationType ?? null,
+    iterationCount: profile.IterationCount ?? null,
+    fvecCount: profile.FvecCount ?? null,
+    controls: (profile.Controls ?? [])
+      .filter((c) => c.Use)
+      .map((c) => ({
+        name: c.Name,
+        object: c.Object ?? '',
+        value: formatOptimNum(c.CurrentValue),
+      })),
+    results: (profile.Results ?? [])
+      .filter((r) => r.Use)
+      .map((r) => ({
+        name: r.Name,
+        object: r.Object ?? '',
+        goal: r.Goal ?? '',
+        dltFG: formatOptimNum(r.DltFG),
+      })),
+  }))
+}
+
 export function buildChartConfigs(series) {
   const { time, q, height, velocity, overload, mass, thrust } = series
   const axisNameStyle = { color: '#c8d0dc', fontSize: 13 }
