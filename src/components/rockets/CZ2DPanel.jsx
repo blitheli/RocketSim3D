@@ -17,7 +17,7 @@ const ENGINE_TABS = [
   { label: '二级游机', key: 'Stage2_VernierEngine' },
 ]
 
-export default function CZ2DPanel({ payload, onChange, shiXuRows }) {
+export default function CZ2DPanel({ payload, onChange, shiXuTable }) {
   const input = payload.RocketInput
   const { updateInput, updateEngine } = bindRocketInput(onChange)
 
@@ -94,7 +94,7 @@ export default function CZ2DPanel({ payload, onChange, shiXuRows }) {
         </GroupBox>
         </aside>
       </div>
-      <ShiXuTable rows={shiXuRows} />
+      <ShiXuTable columns={shiXuTable.columns} rows={shiXuTable.rows} />
     </div>
   )
 }

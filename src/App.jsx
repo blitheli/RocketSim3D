@@ -38,7 +38,7 @@ export default function App() {
     () => extractTrajectoryPoints(apiResult),
     [apiResult],
   )
-  const shiXuRows = useMemo(() => extractShiXuTable(apiResult), [apiResult])
+  const shiXuTable = useMemo(() => extractShiXuTable(apiResult), [apiResult])
   const handleRocketTypeChange = useCallback((type) => {
     const preset = ROCKET_PRESETS.find((p) => p.type === type)
     if (!preset) return
@@ -133,7 +133,7 @@ export default function App() {
       />
 
       <div className="app-main">
-        <RocketPanel payload={payload} onChange={setPayload} shiXuRows={shiXuRows} />
+        <RocketPanel payload={payload} onChange={setPayload} shiXuTable={shiXuTable} />
         <div className="center-column">
           <Cesium3D
             trajectoryPoints={trajectoryPoints}

@@ -19,7 +19,7 @@ const ENGINE_TABS = [
   { label: '三级发动机', key: 'Stage3_Engine' },
 ]
 
-export default function CZ4CPanel({ payload, onChange, shiXuRows }) {
+export default function CZ4CPanel({ payload, onChange, shiXuTable }) {
   const input = payload.RocketInput
   const { updateInput, updateEngine } = bindRocketInput(onChange)
 
@@ -117,7 +117,7 @@ export default function CZ4CPanel({ payload, onChange, shiXuRows }) {
         </GroupBox>
         </aside>
       </div>
-      <ShiXuTable rows={shiXuRows} />
+      <ShiXuTable columns={shiXuTable.columns} rows={shiXuTable.rows} />
     </div>
   )
 }

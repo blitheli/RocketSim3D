@@ -10,7 +10,7 @@ function toNumberArray(arr) {
   if (!Array.isArray(arr)) return []
   return arr.map((v) => Number(v))
 }
-
+//=================================================================================
 export function extractAllData(apiResult) {
   const dic = apiResult?.DicAllData ?? apiResult?.dicAllData ?? {}
   const time = toNumberArray(pickSeries(dic, ['tt', 't', 'T', 'time', 'Time']))
@@ -27,126 +27,63 @@ export function extractAllData(apiResult) {
   return { time, q, height, velocity, overload, mass, thrust, lon, lat, alt }
 }
 
-export function extractStageTable(apiResult, rocketInput) {
-  const dic = apiResult?.DicShiXu ?? apiResult?.dicShiXu ?? {}
-  const names = dic.Text ?? dic.text ?? []
-  const times = dic.tt ?? []
-  const fuel = dic.mass_y ?? []
-  const totalMass = dic.mass ?? []
-  const height = dic.h ?? []
-  const velocity = dic.V ?? []
+//=================================================================================
+/** 计算完成后特征点参数的飞行时序表格列定义（field 对应 DicKeyData 字段名） */
+const SHIXU_FIELD_DEFS = [
+  { label: '飞行段', field: 'Text', cellClass: 'shixu-name', text: true },
+  { label: '时刻 (s)', field: 'tt', digits: 2 },
+  { label: '总质量 (kg)', field: 'mass', digits: 2 },
+  { label: '推进剂 (kg)', field: 'mass_y', digits: 2 },
+  { label: '高度 (km)', field: 'h', digits: 3, scale: 1 / 1000 },
+  { label: '速度 (m/s)', field: 'V', digits: 2 },
+  { label: '推力 (KN)', field: 'Fx', digits: 2, scale: 1 / 1000 },
+  { label: '过载nx', field: 'nx', digits: 3 },
+  { label: '俯仰程序角 (°)', field: 'phicx', digits: 3 },
+  { label: '当地俯仰角 (°)', field: 'phi_d', digits: 2 },
+]
 
-  if (Array.isArray(names) && names.length > 0) {
-    const fallbackRows = buildFallbackStageTable(rocketInput)
-    return names.map((name, i) => {
-      const fallback = fallbackRows[i] ?? {}
-      const nextTime = times[i + 1]
-      const duration =
-        nextTime != null && times[i] != null ? Number(nextTime) - Number(times[i]) : fallback.duration
-
-      return {
-        name: String(name),
-        thrust: fallback.thrust,
-        ips: fallback.ips,
-        structMass: fallback.structMass,
-        duration,
-        sm: fallback.sm,
-        sa: fallback.sa,
-        yaw: fallback.yaw ?? '跟随',
-        pitchRate: fallback.pitchRate,
-        fuel: num(fuel[i]),
-        totalMass: num(totalMass[i]),
-        overload: height[i] && velocity[i] ? num(velocity[i]) / 1000 : fallback.overload,
-      }
-    })
-  }
-
-  return buildFallbackStageTable(rocketInput)
+function formatShiXuCell(value, col) {
+  if (col.text) return String(value ?? '')
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '-'
+  const scaled = col.scale != null ? n * col.scale : n
+  return scaled.toLocaleString('zh-CN', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: col.digits ?? 2,
+  })
 }
 
-function buildFallbackStageTable(rocketInput) {
-  if (!rocketInput) return []
-  const rows = []
-
-  const pushStage = (title, engine, mass, fuel, duration) => {
-    const count = engine?.NumberOfEngines ?? 1
-    rows.push({
-      name: title,
-      thrust: num(engine?.Force) * count,
-      ips: num(engine?.Ips),
-      structMass: num(mass) - num(fuel),
-      duration: num(duration),
-      sm: num(rocketInput.Sm),
-      sa: num(engine?.Sa),
-      yaw: '跟随',
-      pitchRate: 0,
-      fuel: num(fuel),
-      totalMass: num(mass),
-      overload: 0,
-    })
+function emptyShiXuTable() {
+  return {
+    columns: SHIXU_FIELD_DEFS.map(({ label, cellClass }) => ({ label, cellClass })),
+    rows: [],
   }
-
-  pushStage(
-    '一级',
-    rocketInput.Stage1_Engine,
-    rocketInput.Stage1_Mass,
-    rocketInput.Stage1_FuelMass,
-    rocketInput.Tk_1,
-  )
-
-  if (rocketInput.Stage2_Mass) {
-    pushStage(
-      '二级主',
-      rocketInput.Stage2_MainEngine,
-      rocketInput.Stage2_Mass,
-      rocketInput.Stage2_FuelMass,
-      rocketInput.Tk_2z,
-    )
-    if (rocketInput.Stage2_VernierEngine) {
-      pushStage(
-        '二级游',
-        rocketInput.Stage2_VernierEngine,
-        0,
-        0,
-        rocketInput.Tk_2u,
-      )
-    }
-  }
-
-  if (rocketInput.Stage3_Mass) {
-    pushStage(
-      '三级',
-      rocketInput.Stage3_Engine,
-      rocketInput.Stage3_Mass,
-      rocketInput.Stage3_FuelMass,
-      rocketInput.Tk_3,
-    )
-  }
-
-  return rows
 }
 
+/** 从 DicKeyData 提取特征点表格（取偶数索引行 0,2,4…） */
 export function extractShiXuTable(apiResult) {
-  const dic = apiResult?.DicShiXu ?? apiResult?.dicShiXu ?? {}
+  const dic = apiResult?.DicKeyData ?? apiResult?.dicKeyData ?? {}
   const names = dic.Text ?? dic.text ?? []
-  if (!Array.isArray(names) || names.length === 0) return []
+  if (!Array.isArray(names) || names.length === 0) return emptyShiXuTable()
 
-  const tt     = dic.tt     ?? []
-  const h      = dic.h      ?? []
-  const V      = dic.V      ?? []
-  const mass   = dic.mass   ?? []
-  const mass_y = dic.mass_y ?? []
+  const rows = []
+  for (let i = 0; i < names.length; i += 2) {
+    rows.push(
+      SHIXU_FIELD_DEFS.map((col) => {
+        const series = dic[col.field] ?? []
+        const value = Array.isArray(series) ? series[i] : series
+        return formatShiXuCell(value, col)
+      }),
+    )
+  }
 
-  return names.map((name, i) => ({
-    name:    String(name),
-    time:    num(tt[i]),
-    height:  num(h[i]),
-    velocity: num(V[i]),
-    mass:    num(mass[i]),
-    fuel:    num(mass_y[i]),
-  }))
+  return {
+    columns: SHIXU_FIELD_DEFS.map(({ label, cellClass }) => ({ label, cellClass })),
+    rows,
+  }
 }
 
+//=================================================================================
 export function extractTrajectoryPoints(apiResult) {
   const all = extractAllData(apiResult)
   if (all.lon.length && all.lat.length) {
@@ -190,11 +127,6 @@ export function extractSummary(apiResult) {
       null,
     terminationType: profile?.OptimTerminationType ?? null,
   }
-}
-
-function num(value) {
-  const n = Number(value)
-  return Number.isFinite(n) ? n : 0
 }
 
 export function buildChartConfigs(series) {
