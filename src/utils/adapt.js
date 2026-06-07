@@ -126,6 +126,27 @@ function buildFallbackStageTable(rocketInput) {
   return rows
 }
 
+export function extractShiXuTable(apiResult) {
+  const dic = apiResult?.DicShiXu ?? apiResult?.dicShiXu ?? {}
+  const names = dic.Text ?? dic.text ?? []
+  if (!Array.isArray(names) || names.length === 0) return []
+
+  const tt     = dic.tt     ?? []
+  const h      = dic.h      ?? []
+  const V      = dic.V      ?? []
+  const mass   = dic.mass   ?? []
+  const mass_y = dic.mass_y ?? []
+
+  return names.map((name, i) => ({
+    name:    String(name),
+    time:    num(tt[i]),
+    height:  num(h[i]),
+    velocity: num(V[i]),
+    mass:    num(mass[i]),
+    fuel:    num(mass_y[i]),
+  }))
+}
+
 export function extractTrajectoryPoints(apiResult) {
   const all = extractAllData(apiResult)
   if (all.lon.length && all.lat.length) {
@@ -178,27 +199,70 @@ function num(value) {
 
 export function buildChartConfigs(series) {
   const { time, q, height, velocity, overload, mass, thrust } = series
-  const baseX = {
-    type: 'category',
-    data: time.map((t) => t.toFixed(1)),
-    name: '时间(s)',
-    axisLine: { lineStyle: { color: '#6b7a90' } },
-  }
+  const axisNameStyle = { color: '#c8d0dc', fontSize: 13 }
+  const axisLabelStyle = { color: '#9aa8bc', fontSize: 12 }
 
-  const baseGrid = { left: 40, right: 8, top: 28, bottom: 22 }
-  const titleStyle = { color: '#e8edf5', fontSize: 11 }
+  const pair = (ys) => time.map((t, i) => [t, ys[i]])
+
+  const tMax = time.length ? time[time.length - 1] : 0
+
+  const makeX = ({ min, max, interval } = {}) => ({
+    type: 'value',
+    name: '时间(s)',
+    nameLocation: 'middle',
+    nameGap: 30,
+    nameTextStyle: axisNameStyle,
+    axisLabel: {
+      ...axisLabelStyle,
+      margin: 10,
+      formatter: (v) => `${Math.round(v)}`,
+    },
+    axisLine: { lineStyle: { color: '#6b7a90' } },
+    ...(min !== undefined ? { min } : {}),
+    ...(max !== undefined ? { max } : {}),
+    ...(interval !== undefined ? { interval } : {}),
+  })
+
+  // 默认 X 轴：从 0 开始，整十秒刻度，间隔根据总时长动态选取，避免过密
+  const pickInterval = (span) => {
+    const candidates = [10, 20, 30, 60, 120, 180, 300, 600]
+    const targetTicks = 8
+    for (const step of candidates) {
+      if (span / step <= targetTicks) return step
+    }
+    return Math.ceil(span / targetTicks / 60) * 60
+  }
+  const defaultInterval = pickInterval(Math.max(tMax, 10))
+  const defaultXMax = Math.max(defaultInterval, Math.ceil(tMax / defaultInterval) * defaultInterval)
+  const baseX = makeX({ min: 0, max: defaultXMax, interval: defaultInterval })
+
+  const yBase = (name) => ({
+    type: 'value',
+    name,
+    nameGap: 16,
+    nameTextStyle: axisNameStyle,
+    axisLabel: { ...axisLabelStyle, margin: 8 },
+    axisLine: { lineStyle: { color: '#6b7a90' } },
+  })
+
+  const baseGrid = { left: 14, right: 18, top: 48, bottom: 52, containLabel: true }
+  const titleStyle = { color: '#e8edf5', fontSize: 14 }
 
   return {
     q: {
-      title: '时间-动压',
+      title: '时间-动压/过载',
       option: {
         backgroundColor: 'transparent',
-        title: { text: '时间-动压', left: 'center', textStyle: titleStyle },
+        title: { text: '时间-动压/过载', left: 'center', textStyle: titleStyle },
         tooltip: { trigger: 'axis' },
-        grid: baseGrid,
+        legend: { data: ['动压', '过载'], textStyle: { color: '#c8d0dc', fontSize: 12 }, top: 26, itemWidth: 14 },
+        grid: { ...baseGrid, right: 24, top: 56 },
         xAxis: baseX,
-        yAxis: { type: 'value', name: '动压(Pa)', axisLine: { lineStyle: { color: '#6b7a90' } } },
-        series: [{ name: '动压', type: 'line', data: q, smooth: true, showSymbol: false, lineStyle: { color: '#ff8c42' } }],
+        yAxis: [yBase('动压(Pa)'), yBase('过载(g)')],
+        series: [
+          { name: '动压', type: 'line', data: pair(q), smooth: true, showSymbol: false, lineStyle: { color: '#ff8c42' } },
+          { name: '过载', type: 'line', yAxisIndex: 1, data: pair(overload), smooth: true, showSymbol: false, lineStyle: { color: '#ef5350' } },
+        ],
       },
     },
     hv: {
@@ -207,16 +271,13 @@ export function buildChartConfigs(series) {
         backgroundColor: 'transparent',
         title: { text: '时间-高度/速度', left: 'center', textStyle: titleStyle },
         tooltip: { trigger: 'axis' },
-        legend: { data: ['高度', '速度'], textStyle: { color: '#c8d0dc', fontSize: 9 }, top: 16, itemWidth: 12 },
-        grid: { ...baseGrid, right: 36 },
+        legend: { data: ['高度', '速度'], textStyle: { color: '#c8d0dc', fontSize: 12 }, top: 26, itemWidth: 14 },
+        grid: { ...baseGrid, right: 24, top: 56 },
         xAxis: baseX,
-        yAxis: [
-          { type: 'value', name: '高度(m)', axisLine: { lineStyle: { color: '#6b7a90' } } },
-          { type: 'value', name: '速度(m/s)', axisLine: { lineStyle: { color: '#6b7a90' } } },
-        ],
+        yAxis: [yBase('高度(km)'), yBase('速度(m/s)')],
         series: [
-          { name: '高度', type: 'line', data: height, smooth: true, showSymbol: false, lineStyle: { color: '#4fc3f7' } },
-          { name: '速度', type: 'line', yAxisIndex: 1, data: velocity, smooth: true, showSymbol: false, lineStyle: { color: '#81c784' } },
+          { name: '高度', type: 'line', data: pair(height.map((h) => h / 1000)), smooth: true, showSymbol: false, lineStyle: { color: '#4fc3f7' } },
+          { name: '速度', type: 'line', yAxisIndex: 1, data: pair(velocity), smooth: true, showSymbol: false, lineStyle: { color: '#81c784' } },
         ],
       },
     },
@@ -228,8 +289,8 @@ export function buildChartConfigs(series) {
         tooltip: { trigger: 'axis' },
         grid: baseGrid,
         xAxis: baseX,
-        yAxis: { type: 'value', name: '过载(g)', axisLine: { lineStyle: { color: '#6b7a90' } } },
-        series: [{ name: '轴向过载', type: 'line', data: overload, smooth: true, showSymbol: false, lineStyle: { color: '#ef5350' } }],
+        yAxis: yBase('过载(g)'),
+        series: [{ name: '轴向过载', type: 'line', data: pair(overload), smooth: true, showSymbol: false, lineStyle: { color: '#ef5350' } }],
       },
     },
     mass: {
@@ -240,20 +301,20 @@ export function buildChartConfigs(series) {
         tooltip: { trigger: 'axis' },
         grid: baseGrid,
         xAxis: baseX,
-        yAxis: { type: 'value', name: '质量(kg)', axisLine: { lineStyle: { color: '#6b7a90' } } },
-        series: [{ name: '质量', type: 'line', data: mass, smooth: true, showSymbol: false, lineStyle: { color: '#ba68c8' } }],
+        yAxis: yBase('质量(kg)'),
+        series: [{ name: '质量', type: 'line', data: pair(mass), smooth: true, showSymbol: false, lineStyle: { color: '#ba68c8' } }],
       },
     },
     thrust: {
       title: '时间-推力',
       option: {
         backgroundColor: 'transparent',
-        title: { text: '时间-推力', left: 'center', textStyle: { color: '#e8edf5', fontSize: 13 } },
+        title: { text: '时间-推力', left: 'center', textStyle: titleStyle },
         tooltip: { trigger: 'axis' },
         grid: baseGrid,
         xAxis: baseX,
-        yAxis: { type: 'value', name: '推力(N)', axisLine: { lineStyle: { color: '#6b7a90' } } },
-        series: [{ name: '轴向推力', type: 'line', data: thrust, smooth: true, showSymbol: false, lineStyle: { color: '#ffd54f' } }],
+        yAxis: yBase('推力(N)'),
+        series: [{ name: '轴向推力', type: 'line', data: pair(thrust), smooth: true, showSymbol: false, lineStyle: { color: '#ffd54f' } }],
       },
     },
   }

@@ -4,6 +4,7 @@ import OptimConfigModal from './components/OptimConfigModal'
 import Cesium3D from './components/Cesium3D'
 import TrajectoryCharts from './components/charts/TrajectoryCharts'
 import {
+  ROCKET_PRESETS,
   clonePayload,
   getPresetById,
   getRocketPanel,
@@ -17,6 +18,7 @@ import {
 } from './api/trajectory'
 import {
   extractAllData,
+  extractShiXuTable,
   extractTrajectoryPoints,
 } from './utils/adapt'
 
@@ -24,10 +26,7 @@ const DEFAULT_PRESET_ID = 'cz2d-sso'
 
 export default function App() {
   const fileInputRef = useRef(null)
-  const [presetId, setPresetId] = useState(DEFAULT_PRESET_ID)
   const [payload, setPayload] = useState(() => clonePayload(getPresetById(DEFAULT_PRESET_ID).payload))
-  const [startTime, setStartTime] = useState('2026-05-29 00:00:00.000 UTCG')
-  const [endTime, setEndTime] = useState('2026-05-29 00:10:00.000 UTCG')
   const [loading, setLoading] = useState(false)
   const [optimModalOpen, setOptimModalOpen] = useState(false)
   const [apiResult, setApiResult] = useState(null)
@@ -39,9 +38,11 @@ export default function App() {
     () => extractTrajectoryPoints(apiResult),
     [apiResult],
   )
-  const handlePresetChange = useCallback((nextPresetId) => {
-    setPresetId(nextPresetId)
-    setPayload(clonePayload(getPresetById(nextPresetId).payload))
+  const shiXuRows = useMemo(() => extractShiXuTable(apiResult), [apiResult])
+  const handleRocketTypeChange = useCallback((type) => {
+    const preset = ROCKET_PRESETS.find((p) => p.type === type)
+    if (!preset) return
+    setPayload(clonePayload(preset.payload))
     setApiResult(null)
   }, [])
 
@@ -113,12 +114,8 @@ export default function App() {
       />
 
       <TopBar
-        presetId={presetId}
-        onPresetChange={handlePresetChange}
-        startTime={startTime}
-        endTime={endTime}
-        onStartTimeChange={setStartTime}
-        onEndTimeChange={setEndTime}
+        rocketType={rocketType}
+        onRocketTypeChange={handleRocketTypeChange}
         loading={loading}
         onLoad={handleLoad}
         onSave={handleSave}
@@ -136,7 +133,7 @@ export default function App() {
       />
 
       <div className="app-main">
-        <RocketPanel payload={payload} onChange={setPayload} />
+        <RocketPanel payload={payload} onChange={setPayload} shiXuRows={shiXuRows} />
         <div className="center-column">
           <Cesium3D
             trajectoryPoints={trajectoryPoints}

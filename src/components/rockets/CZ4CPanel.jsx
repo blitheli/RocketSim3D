@@ -2,105 +2,69 @@ import BasicParams from '../params/BasicParams'
 import OrbitParams from '../params/OrbitParams'
 import GroupBox from '../params/GroupBox'
 import Field from '../params/Field'
-import EngineCard from '../params/EngineCard'
+import EngineTabs from '../params/EngineTabs'
+import ShiXuTable from '../params/ShiXuTable'
 import { bindRocketInput } from '../../utils/useRocketInput'
 
-export default function CZ4CPanel({ payload, onChange }) {
+const MASS_STAGES = [
+  { label: '一级', massKey: 'Stage1_Mass', fuelKey: 'Stage1_FuelMass' },
+  { label: '二级', massKey: 'Stage2_Mass', fuelKey: 'Stage2_FuelMass' },
+  { label: '三级', massKey: 'Stage3_Mass', fuelKey: 'Stage3_FuelMass' },
+]
+
+const ENGINE_TABS = [
+  { label: '一级发动机', key: 'Stage1_Engine' },
+  { label: '二级主机', key: 'Stage2_MainEngine' },
+  { label: '二级游机', key: 'Stage2_VernierEngine' },
+  { label: '三级发动机', key: 'Stage3_Engine' },
+]
+
+export default function CZ4CPanel({ payload, onChange, shiXuRows }) {
   const input = payload.RocketInput
   const { updateInput, updateEngine } = bindRocketInput(onChange)
 
   return (
-    <>
-      <div className="param-panel">
-        <div className="rocket-info">
-          <div><strong>{input.Name}</strong> (CZ-4C)</div>
-          {input.Text && <div>{input.Text}</div>}
-          {input.Text2 && <div>{input.Text2}</div>}
-          {input.Text3 && <div>{input.Text3}</div>}
+    <div className="left-area">
+      <div className="left-top">
+        <div className="param-panel">
+          <div className="rocket-info">
+            <div><strong>{input.$type}</strong></div>
+            {input.Text && <div>{input.Text}</div>}
+            {input.Text2 && <div>{input.Text2}</div>}
+            {input.Text3 && <div>{input.Text3}</div>}
+          </div>
+
+          <BasicParams input={input} onChange={updateInput} />
+          <OrbitParams input={input} onChange={updateInput} />
+
+          <EngineTabs engines={ENGINE_TABS} input={input} onEngineChange={updateEngine} />
         </div>
 
-        <BasicParams input={input} onChange={updateInput} />
-        <OrbitParams input={input} onChange={updateInput} />
-
-        <GroupBox title="一级参数" className="stage-group">
-          <div className="stage-field-row">
-            <Field label="总质量" unit="kg" className="field-input-compact">
-              <input
-                type="number"
-                value={input.Stage1_Mass ?? 0}
-                onChange={(e) => updateInput('Stage1_Mass', e.target.value)}
-              />
-            </Field>
-            <Field label="推进剂" unit="kg" className="field-input-compact">
-              <input
-                type="number"
-                value={input.Stage1_FuelMass ?? 0}
-                onChange={(e) => updateInput('Stage1_FuelMass', e.target.value)}
-              />
-            </Field>
-          </div>
-          <EngineCard
-            title="一级发动机"
-            engine={input.Stage1_Engine ?? {}}
-            onChange={(field, value, type) => updateEngine('Stage1_Engine', field, value, type)}
-          />
+        <aside className="timeline-panel">
+        <GroupBox title="质量表" className="mass-table">
+          <table className="mass-table-grid">
+            <thead>
+              <tr>
+                <th>级</th>
+                <th>总质量 (kg)</th>
+                <th>推进剂 (kg)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {MASS_STAGES.map(({ label, massKey, fuelKey }) => (
+                <tr key={label}>
+                  <td className="mass-table-stage">{label}</td>
+                  <td>
+                    <input type="number" value={input[massKey] ?? 0} onChange={(e) => updateInput(massKey, e.target.value)} />
+                  </td>
+                  <td>
+                    <input type="number" value={input[fuelKey] ?? 0} onChange={(e) => updateInput(fuelKey, e.target.value)} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </GroupBox>
-
-        <GroupBox title="二级参数" className="stage-group">
-          <div className="stage-field-row">
-            <Field label="总质量" unit="kg" className="field-input-compact">
-              <input
-                type="number"
-                value={input.Stage2_Mass ?? 0}
-                onChange={(e) => updateInput('Stage2_Mass', e.target.value)}
-              />
-            </Field>
-            <Field label="推进剂" unit="kg" className="field-input-compact">
-              <input
-                type="number"
-                value={input.Stage2_FuelMass ?? 0}
-                onChange={(e) => updateInput('Stage2_FuelMass', e.target.value)}
-              />
-            </Field>
-          </div>
-          <EngineCard
-            title="二级主机"
-            engine={input.Stage2_MainEngine ?? {}}
-            onChange={(field, value, type) => updateEngine('Stage2_MainEngine', field, value, type)}
-          />
-          <EngineCard
-            title="二级游机"
-            engine={input.Stage2_VernierEngine ?? {}}
-            onChange={(field, value, type) => updateEngine('Stage2_VernierEngine', field, value, type)}
-          />
-        </GroupBox>
-
-        <GroupBox title="三级参数" className="stage-group">
-          <div className="stage-field-row">
-            <Field label="总质量" unit="kg" className="field-input-compact">
-              <input
-                type="number"
-                value={input.Stage3_Mass ?? 0}
-                onChange={(e) => updateInput('Stage3_Mass', e.target.value)}
-              />
-            </Field>
-            <Field label="推进剂" unit="kg" className="field-input-compact">
-              <input
-                type="number"
-                value={input.Stage3_FuelMass ?? 0}
-                onChange={(e) => updateInput('Stage3_FuelMass', e.target.value)}
-              />
-            </Field>
-          </div>
-          <EngineCard
-            title="三级发动机"
-            engine={input.Stage3_Engine ?? {}}
-            onChange={(field, value, type) => updateEngine('Stage3_Engine', field, value, type)}
-          />
-        </GroupBox>
-      </div>
-
-      <aside className="timeline-panel">
         <GroupBox title="飞行时序">
           <Field label="一级工作时间" unit="s">
             <input type="number" step="0.0001" value={input.Tk_1 ?? 0} onChange={(e) => updateInput('Tk_1', e.target.value)} />
@@ -151,7 +115,9 @@ export default function CZ4CPanel({ payload, onChange }) {
             <input type="number" step="0.0001" value={input.Phicx_DotHx ?? 0} onChange={(e) => updateInput('Phicx_DotHx', e.target.value)} />
           </Field>
         </GroupBox>
-      </aside>
-    </>
+        </aside>
+      </div>
+      <ShiXuTable rows={shiXuRows} />
+    </div>
   )
 }

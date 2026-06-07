@@ -1,10 +1,10 @@
 import Field from './Field'
 
-export default function EngineCard({ title, engine, onChange }) {
+export default function EngineCard({ title, engine, onChange, hideTitle = false }) {
   return (
     <div className="engine-card">
-      <div className="engine-card-header">
-        <div className="engine-card-title">{title}</div>
+      <div className={`engine-card-header${hideTitle ? ' engine-card-header-compact' : ''}`}>
+        {!hideTitle && <div className="engine-card-title">{title}</div>}
         <label className="engine-card-vacuum">
           <span className="engine-card-vacuum-label">真空发动机</span>
           <input
@@ -14,7 +14,7 @@ export default function EngineCard({ title, engine, onChange }) {
           />
         </label>
       </div>
-      <div className="group-box-body engine-card-body">
+      <div className="engine-card-body">
         <div className="engine-field-row">
           <Field label="名称" className="field-engine-name">
             <input

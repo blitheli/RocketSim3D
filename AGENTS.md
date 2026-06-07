@@ -194,10 +194,12 @@ curl -X POST "http://astrox.cn:8764/Rocket/TrajectoryOptim" \
 
 ### 服务与端口
 
-| 服务 | 命令 | URL |
-| --- | --- | --- |
-| Vite 开发服务器 | `npm run dev`（见下方 tmux 说明） | http://localhost:5173 |
-| AstroX 弹道 API | 无需本地启动；开发时经 Vite 代理 | `POST /api/Rocket/TrajectoryOptim` → `http://astrox.cn:8764` |
+
+| 服务            | 命令                         | URL                                                          |
+| ------------- | -------------------------- | ------------------------------------------------------------ |
+| Vite 开发服务器    | `npm run dev`（见下方 tmux 说明） | [http://localhost:5173](http://localhost:5173)               |
+| AstroX 弹道 API | 无需本地启动；开发时经 Vite 代理        | `POST /api/Rocket/TrajectoryOptim` → `http://astrox.cn:8764` |
+
 
 本项目无本地后端、无数据库。端到端联调需要能访问外网 `astrox.cn:8764`（及默认 OSM 瓦片 `tile.openstreetmap.org`）。
 
@@ -224,7 +226,7 @@ tmux -f /exec-daemon/tmux.portal.conf new-session -d -s vite-dev-server -c /work
 ### 快速验证
 
 - API（不经 UI）：`curl -X POST "http://localhost:5173/api/Rocket/TrajectoryOptim" -H "Content-Type: application/json" -d "@DDJS/CZ-2D/CZ2D_SSO_260601.json"`
-- UI：打开 http://localhost:5173，点击顶栏「计算」，应出现 ECharts 曲线与 Cesium 弹道。
+- UI：打开 [http://localhost:5173，点击顶栏「计算」，应出现](http://localhost:5173，点击顶栏「计算」，应出现) ECharts 曲线与 Cesium 弹道。
 
 ### 可选环境变量
 

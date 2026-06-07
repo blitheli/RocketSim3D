@@ -1,12 +1,8 @@
-import { ROCKET_PRESETS } from '../data/rockets'
+import { ROCKET_TYPES } from '../data/rockets'
 
 export default function TopBar({
-  presetId,
-  onPresetChange,
-  startTime,
-  endTime,
-  onStartTimeChange,
-  onEndTimeChange,
+  rocketType,
+  onRocketTypeChange,
   loading,
   onLoad,
   onSave,
@@ -19,23 +15,13 @@ export default function TopBar({
     <header className="top-bar">
       <div className="top-bar-section">
         <label>火箭型号</label>
-        <select value={presetId} onChange={(e) => onPresetChange(e.target.value)}>
-          {ROCKET_PRESETS.map((preset) => (
-            <option key={preset.id} value={preset.id}>
-              {preset.name}
+        <select value={rocketType} onChange={(e) => onRocketTypeChange(e.target.value)}>
+          {Object.entries(ROCKET_TYPES).map(([type, info]) => (
+            <option key={type} value={type}>
+              {info.label}
             </option>
           ))}
         </select>
-      </div>
-
-      <div className="top-bar-section">
-        <label>开始</label>
-        <input type="text" value={startTime} onChange={(e) => onStartTimeChange(e.target.value)} />
-      </div>
-
-      <div className="top-bar-section">
-        <label>结束</label>
-        <input type="text" value={endTime} onChange={(e) => onEndTimeChange(e.target.value)} />
       </div>
 
       <div className="top-bar-actions">
