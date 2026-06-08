@@ -77,11 +77,14 @@ your-domain.com {
 
 ### 环境变量
 
-| 变量 | 说明 | 默认 |
-| --- | --- | --- |
-| `PORT` | Express 监听端口 | `3001` |
-| `JWT_SECRET` | 登录令牌密钥，**生产务必设置** | 内置开发值 |
-| `ASTROX_TARGET` | 弹道 API 上游地址 | `http://astrox.cn:8764` |
-| `VITE_CESIUM_ION_TOKEN` | Cesium Ion 地形 token（构建期生效） | 未设置则用 OSM 底图 |
+
+| 变量                      | 说明                         | 默认                      |
+| ----------------------- | -------------------------- | ----------------------- |
+| `PORT`                  | Express 监听端口               | `3001`                  |
+| `JWT_SECRET`            | 登录令牌密钥，**生产务必设置**          | 内置开发值                   |
+| `ASTROX_TARGET`         | 弹道 API 上游地址                | `http://astrox.cn:8764` |
+| `VITE_CESIUM_ION_TOKEN` | Cesium Ion 地形 token（构建期生效） | 未设置则用 OSM 底图            |
+
 
 > 部署机器需能访问外网弹道 API（`astrox.cn:8764`）与底图瓦片（`tile.openstreetmap.org`）。用户方案存于 `server/data/`，重新部署时注意保留该目录。
+
