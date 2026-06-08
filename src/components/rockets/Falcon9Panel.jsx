@@ -21,14 +21,6 @@ function fmtRemaining(kg) {
   })
 }
 
-function engineThrottle(engine) {
-  const throttling = engine?.ThrustThrottling
-  if (Array.isArray(throttling) && throttling.length >= 2) {
-    return Number(throttling[1]) || 1
-  }
-  return 1
-}
-
 export default function Falcon9Panel({
   payload,
   onChange,
@@ -45,18 +37,15 @@ export default function Falcon9Panel({
     (Number(input.Tk_1) || 0)
     + (Number(input.Dt_k12f) || 0)
     + (Number(input.Dt_dh2) || 0)
-  const firstBurnDuration = Math.max(0, (Number(input.Tk_2) || 0) - stage2Start)
-  const remaining1 = Math.max(
-    0,
-    (Number(input.Stage1_FuelMass) || 0) - burnConsumption(input, 'Stage1_Engine', input.Tk_1),
-  )
-  const remaining2 = Math.max(
-    0,
-    (Number(input.Stage2_FuelMass) || 0)
-      - burnConsumption(input, 'Stage2_Engine', firstBurnDuration)
-      - burnConsumption(input, 'Stage2_Engine2', input.Tk_22) * engineThrottle(input.Stage2_Engine2),
-  )
+  const firstBurnDuration = Math.max(0,  - stage2Start)
 
+  // 一级剩余推进剂 = 一级推进剂 - 一级发动机燃烧消耗推进剂 
+  const remaining1 = (Number(input.Stage1_FuelMass) || 0) - burnConsumption(input, 'Stage1_Engine', input.Tk_1)
+  // 二级剩余推进剂 =
+  const remaining2 =(Number(input.Stage2_FuelMass) || 0)
+      - burnConsumption(input, 'Stage2_Engine', (Number(input.Tk_2) || 0))
+      - burnConsumption(input, 'Stage2_Engine2', (Number(input.Tk_22) || 0))
+  
   return (
     <div className="left-area">
       <div className="left-top">

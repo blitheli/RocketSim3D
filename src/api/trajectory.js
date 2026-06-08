@@ -1,6 +1,22 @@
-const API_BASE = import.meta.env.DEV ? '/api' : 'http://astrox.cn:8764'
+// 开发：Vite 代理 /api → astrox；生产：Express 反代 /api → astrox（同源，无 CORS/混合内容）
+const API_BASE = '/api'
 
 let activeController = null
+
+async function readErrorMessage(response) {
+  try {
+    const data = await response.json()
+    if (data.Message) return data.Message
+    if (data.title && data.errors) {
+      const parts = Object.values(data.errors).flat().filter(Boolean)
+      if (parts.length) return parts.join('；')
+    }
+    if (data.title) return data.title
+  } catch {
+    // ignore parse failure
+  }
+  return `HTTP ${response.status}: ${response.statusText}`
+}
 
 export function abortTrajectoryRequest() {
   if (activeController) {
@@ -35,7 +51,7 @@ export async function runTrajectory(payload, options = {}) {
   })
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    throw new Error(await readErrorMessage(response))
   }
 
   const data = await response.json()

@@ -14,6 +14,8 @@ import {
   getRocketPanel,
   getRocketType,
   getSchemeName,
+  isApiSupportedRocketType,
+  API_SUPPORTED_ROCKET_TYPES,
 } from './data/rockets'
 import {
   abortTrajectoryRequest,
@@ -44,6 +46,7 @@ export default function App() {
   const [apiResult, setApiResult] = useState(null)
   const [user, setUser] = useState(() => getStoredUser())
   const [loadError, setLoadError] = useState(null)
+  const [requestError, setRequestError] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -129,6 +132,16 @@ export default function App() {
     if (!payload) return
     const runProfiles = mode === 'optimize'
     const requestPayload = { ...payload, RunProfiles: runProfiles }
+    const rocketType = getRocketType(requestPayload)
+
+    if (!isApiSupportedRocketType(rocketType)) {
+      setRequestError(
+        `弹道 API 暂不支持型号「${rocketType}」。当前可用：${API_SUPPORTED_ROCKET_TYPES.join('、')}。请升级 astrox 服务后再试。`,
+      )
+      return
+    }
+
+    setRequestError(null)
     setPayload(requestPayload)
     setLoading(true)
     if (mode === 'optimize') {
@@ -157,7 +170,9 @@ export default function App() {
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
-        console.error(error.message || '请求失败')
+        const message = error.message || '请求失败'
+        console.error(message)
+        setRequestError(message)
       }
     } finally {
       setLoading(false)
@@ -188,6 +203,11 @@ export default function App() {
       {loadError && (
         <div className="app-banner app-banner-warn" role="status">
           {loadError}
+        </div>
+      )}
+      {requestError && (
+        <div className="app-banner app-banner-error" role="alert">
+          {requestError}
         </div>
       )}
       <TopBar

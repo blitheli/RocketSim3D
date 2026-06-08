@@ -149,7 +149,7 @@
       ]
     },
     {
-      "$type": "ProfileDC",
+      "$type": "DifferentialCorrector",
       "Name": "Falcon9_SECO-2",
       "Text": "在远地点二次点火进入300km圆轨道",
       "IsActive": true,

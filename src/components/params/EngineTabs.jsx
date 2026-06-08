@@ -28,6 +28,7 @@ export default function EngineTabs({ engines, input, onEngineChange }) {
       <div className="engine-tabs-panel" role="tabpanel">
         <EngineCard
           hideTitle
+          engineLabel={active.label}
           engine={input[active.key] ?? {}}
           onChange={(field, value, type) => onEngineChange(active.key, field, value, type)}
         />

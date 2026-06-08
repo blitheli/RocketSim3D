@@ -19,6 +19,13 @@ export const ROCKET_TYPES = {
   'Falcon9': { label: 'Falcon9' },
 }
 
+/** 当前 astrox 弹道 API 已注册的 RocketInput.$type */
+export const API_SUPPORTED_ROCKET_TYPES = ['CZ-2D', 'CZ-4B', 'CZ-4C', 'Falcon9']
+
+export function isApiSupportedRocketType(type) {
+  return API_SUPPORTED_ROCKET_TYPES.includes(type)
+}
+
 export function clonePayload(payload) {
   return structuredClone(payload)
 }

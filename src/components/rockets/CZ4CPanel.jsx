@@ -16,7 +16,7 @@ const ENGINE_TABS = [
 ]
 
 function fmtRemaining(kg) {
-  return kg.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 1 })
+  return kg.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 }
 
 export default function CZ4CPanel({

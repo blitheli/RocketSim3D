@@ -6,7 +6,12 @@ const GOAL_OPTIONS = ['Maximize', 'Minimize', 'Equality']
 
 function isDcProfile(profile) {
   const type = profile?.$type ?? ''
-  return type === 'ProfileDC' || String(type).includes('DC')
+  return type === 'DifferentialCorrector' || type === 'ProfileDC'
+}
+
+function isAlglibProfile(profile) {
+  const type = profile?.$type ?? ''
+  return type === 'AlglibOptimizer' || type.includes('Alglib')
 }
 
 function profileTabLabel(profile, index) {
@@ -62,20 +67,21 @@ function formatNum(value) {
   return n.toLocaleString('zh-CN', { maximumFractionDigits: 6 })
 }
 
-function ProfileOptimPanel({ profiles, profileIndex, onChange }) {
+function ProfileOptimPanel({ profiles, profileIndex, onChange, hasTabs = false }) {
   const profile = profiles[profileIndex]
   const dc = isDcProfile(profile)
+  const boxTitle = hasTabs ? undefined : (profile.Name ?? 'Profile')
 
   return (
     <>
-      <GroupBox title={profile.Name ?? 'Profile'} className="profile-optim">
+      <GroupBox title={boxTitle} className="profile-optim">
         <div className="profile-optim-meta">
           <div className="profile-optim-type">{profile.$type ?? 'Optimizer'}</div>
           {profile.Text ? <div className="profile-optim-desc">{profile.Text}</div> : null}
         </div>
 
         <div className="profile-optim-params">
-          {!dc && (
+          {isAlglibProfile(profile) && (
             <>
               <Field label="DiffStep">
                 <input
@@ -398,6 +404,7 @@ export default function ProfileOptim({ profiles, onChange }) {
           profiles={profiles}
           profileIndex={safeIndex}
           onChange={onChange}
+          hasTabs={profiles.length > 1}
         />
       </div>
     </div>
