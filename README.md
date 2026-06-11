@@ -32,11 +32,11 @@ ASTROX.Rocket WebApi（:8764）
 
 ## 开发
 
-需 Node.js 18+，并**先启动 ASTROX.Rocket WebApi**（默认 `http://localhost:8764`）。
+需 Node.js 18+，并**先启动 ASTROX.Rocket WebApi**（默认 `http://astrox.cn:8764`）。
 
 ```bash
 # 终端 1：WebApi（在 ASTROX.Rocket 仓库）
-dotnet run --project ASTROX.RocketWebApi/ASTROX.Rocket.WebApi.csproj --urls http://localhost:8764
+dotnet run --project ASTROX.RocketWebApi/ASTROX.Rocket.WebApi.csproj --urls http://astrox.cn:8764
 
 # 终端 2：前端（本仓库）
 npm install
@@ -48,7 +48,7 @@ Vite 将所有 API 代理到 WebApi（可通过环境变量 `VITE_WEBAPI_TARGET`
 ### 快速验证
 
 ```bash
-curl http://localhost:8764/templates
+curl http://astrox.cn:8764/templates
 curl -X POST http://localhost:5173/api/Rocket/TrajectoryOptim \
   -H "Content-Type: application/json" \
   -d "@public/templates/CZ2D_SSO_260601.json"
@@ -71,6 +71,8 @@ npm run build    # 产出 dist/
 
 ### 3. 静态托管 + 反向代理
 
+**Windows Server + IIS**（含阿里云远程）：见 [deploy/iis/README.md](deploy/iis/README.md)。远程服务器用 `.\deploy\iis\pack.ps1` 打包上传；本机 IIS 可用 `publish.ps1` 直接同步。
+
 将 `dist/` 托管为静态文件，并把以下路径反代到 WebApi（示例 Caddy）：
 
 ```caddyfile
@@ -78,10 +80,10 @@ your-domain.com {
     root * /path/to/RocketSim3D/dist
     try_files {path} /index.html
 
-    reverse_proxy /Rocket/*    localhost:8764
-    reverse_proxy /auth/*      localhost:8764
-    reverse_proxy /templates*  localhost:8764
-    reverse_proxy /schemes*    localhost:8764
+    reverse_proxy /Rocket/*    astrox.cn:8764
+    reverse_proxy /auth/*      astrox.cn:8764
+    reverse_proxy /templates*  astrox.cn:8764
+    reverse_proxy /schemes*    astrox.cn:8764
 }
 ```
 
@@ -90,7 +92,7 @@ your-domain.com {
 ```caddyfile
     handle_path /api/* {
         rewrite * /{path}
-        reverse_proxy localhost:8764
+        reverse_proxy astrox.cn:8764
     }
 ```
 
@@ -98,7 +100,7 @@ your-domain.com {
 
 | 变量 | 说明 | 默认 |
 | ---- | ---- | ---- |
-| `VITE_WEBAPI_TARGET` | 开发时代理目标 WebApi 地址 | `http://localhost:8764` |
+| `VITE_WEBAPI_TARGET` | 开发时代理目标 WebApi 地址 | `http://astrox.cn:8764` |
 | `VITE_CESIUM_ION_TOKEN` | Cesium Ion 地形（构建期） | 未设置则用 OSM 底图 |
 
 > 用户与方案数据在 WebApi 的 SQLite 库（`Data/rocketsim.db`），部署 WebApi 时需保留该文件。模板 JSON 以 WebApi 的 `Templates/` 目录为准（与 `public/templates/` 同步维护）。
@@ -108,4 +110,5 @@ your-domain.com {
 - [UI.md](UI.md) — 布局与设计
 - [AGENTS.md](AGENTS.md) — AI 编码助手指南
 - [迁移.md](迁移.md) — 从 Express 迁移至 WebApi 的说明
+- [deploy/iis/README.md](deploy/iis/README.md) — Windows Server + IIS 发布
 - [ASTROX.Rocket WebApi README](../ASTROX.Rocket/ASTROX.RocketWebApi/README.md) — 后端部署与 JWT 配置

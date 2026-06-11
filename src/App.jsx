@@ -63,7 +63,7 @@ export default function App() {
         console.error(err.message || '加载默认模板失败')
         if (cancelled) return
         setPayload(clonePayload(DEFAULT_SCHEME.payload))
-        setLoadError('后端 API 未启动，已加载内置模板。保存/打开方案需先启动 ASTROX.Rocket WebApi（:8764）')
+        setLoadError('后端 API 未启动，已加载内置模板。保存/打开方案需先启动 ASTROX.Rocket WebApi（astrox.cn:8764）')
       }
     }
     init()

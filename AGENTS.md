@@ -10,7 +10,7 @@ RocketSim3D 是**纯前端**火箭弹道仿真与三维可视化 Web 应用：
 - 中间：Cesium 三维地球 + 弹道轨迹
 - 右侧：飞行时序；底部：ECharts 弹道曲线
 
-弹道计算、用户登录、模板与用户方案均由 **[ASTROX.Rocket WebApi](../ASTROX.Rocket)**（`http://localhost:8764`）提供。本仓库**无** `server/` 目录。
+弹道计算、用户登录、模板与用户方案均由 **[ASTROX.Rocket WebApi](../ASTROX.Rocket)**（`http://astrox.cn:8764`）提供。本仓库**无** `server/` 目录。
 
 ## 技术栈
 
@@ -76,13 +76,13 @@ GET/POST /schemes       → WebApi SQLite（需 Bearer JWT）
 | GET/POST/DELETE | /schemes | JWT |
 | POST | /Rocket/TrajectoryOptim | 无 |
 
-开发时 Vite 将 `/api`、`/auth`、`/templates`、`/schemes` 代理到 `VITE_WEBAPI_TARGET`（默认 `http://localhost:8764`）。`/api` 前缀会被 rewrite 去掉。
+开发时 Vite 将 `/api`、`/auth`、`/templates`、`/schemes` 代理到 `VITE_WEBAPI_TARGET`（默认 `http://astrox.cn:8764`）。`/api` 前缀会被 rewrite 去掉。
 
 ## 开发命令
 
 ```bash
 # 先启动 WebApi（ASTROX.Rocket 仓库）
-dotnet run --project ASTROX.RocketWebApi/ASTROX.Rocket.WebApi.csproj --urls http://localhost:8764
+dotnet run --project ASTROX.RocketWebApi/ASTROX.Rocket.WebApi.csproj --urls http://astrox.cn:8764
 
 # 本仓库
 npm install
@@ -94,7 +94,7 @@ npm run build
 
 ## 部署
 
-- 本仓库：`npm run build` → 托管 `dist/`（Nginx/Caddy/IIS 静态站点）
+- 本仓库：`npm run build` → 托管 `dist/`（Nginx/Caddy/IIS 静态站点）；**Windows IIS 详见 [deploy/iis/README.md](deploy/iis/README.md)**
 - 后端：单独部署 ASTROX.Rocket WebApi；生产 **Jwt:Secret** 配置见 WebApi [README.md](../ASTROX.Rocket/ASTROX.RocketWebApi/README.md)
 - 反代：将 `/Rocket`、`/auth`、`/templates`、`/schemes`（及可选 `/api`）指向 WebApi
 
@@ -120,7 +120,7 @@ npm run build
 ## 测试建议
 
 ```bash
-curl http://localhost:8764/templates
+curl http://astrox.cn:8764/templates
 curl -X POST http://localhost:5173/api/Rocket/TrajectoryOptim \
   -H "Content-Type: application/json" \
   -d "@public/templates/CZ2D_SSO_260601.json"
@@ -137,12 +137,12 @@ curl -X POST http://localhost:5173/api/Rocket/TrajectoryOptim \
 
 | 服务 | 命令 | URL |
 | ---- | ---- | --- |
-| ASTROX.Rocket WebApi | `dotnet run --project ASTROX.RocketWebApi ... --urls http://localhost:8764` | http://localhost:8764 |
+| ASTROX.Rocket WebApi | `dotnet run --project ASTROX.RocketWebApi ... --urls http://astrox.cn:8764` | http://astrox.cn:8764 |
 | Vite | `npm run dev` | http://localhost:5173 |
 
 端到端联调需要 WebApi + Vite；底图默认 `tile.openstreetmap.org`。
 
 ### 可选环境变量
 
-- `VITE_WEBAPI_TARGET`：开发代理目标（默认 `http://localhost:8764`）
+- `VITE_WEBAPI_TARGET`：开发代理目标（默认 `http://astrox.cn:8764`）
 - `VITE_CESIUM_ION_TOKEN`：Cesium Ion（构建期）

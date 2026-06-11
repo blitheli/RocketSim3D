@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import cesium from 'vite-plugin-cesium'
 
-const WEBAPI_TARGET = process.env.VITE_WEBAPI_TARGET || 'http://localhost:8764'
+const WEBAPI_TARGET = process.env.VITE_WEBAPI_TARGET || 'http://astrox.cn:8764'
 
 export default defineConfig({
   plugins: [react(), cesium()],
