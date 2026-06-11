@@ -1,72 +1,108 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import TopBar from './components/TopBar'
 import OptimConfigModal from './components/OptimConfigModal'
-import ParamPanel from './components/ParamPanel'
-import TimelinePanel from './components/TimelinePanel'
+import OptimWaitingOverlay from './components/OptimWaitingOverlay'
+import OptimResultModal from './components/OptimResultModal'
+import LoginModal from './components/LoginModal'
+import SchemeModal from './components/SchemeModal'
+import SaveSchemeModal from './components/SaveSchemeModal'
 import Cesium3D from './components/Cesium3D'
 import TrajectoryCharts from './components/charts/TrajectoryCharts'
 import {
   clonePayload,
-  getPresetById,
+  DEFAULT_SCHEME,
+  getRocketPanel,
   getRocketType,
+  getSchemeName,
+  isApiSupportedRocketType,
+  API_SUPPORTED_ROCKET_TYPES,
 } from './data/rockets'
 import {
   abortTrajectoryRequest,
   calculateTrajectory,
+  getOptimizedControlNames,
   mergeOptimizedPayload,
   optimizeTrajectory,
 } from './api/trajectory'
+import { clearSession, getStoredUser } from './api/auth'
+import { fetchTemplate, fetchTemplates, saveUserScheme } from './api/schemes'
 import {
   extractAllData,
+  extractShiXuTable,
   extractTrajectoryPoints,
 } from './utils/adapt'
 
-const DEFAULT_PRESET_ID = 'cz2d-sso'
-
 export default function App() {
-  const fileInputRef = useRef(null)
-  const [presetId, setPresetId] = useState(DEFAULT_PRESET_ID)
-  const [payload, setPayload] = useState(() => clonePayload(getPresetById(DEFAULT_PRESET_ID).payload))
-  const [startTime, setStartTime] = useState('2026-05-29 00:00:00.000 UTCG')
-  const [endTime, setEndTime] = useState('2026-05-29 00:10:00.000 UTCG')
+  const [payload, setPayload] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [optimizing, setOptimizing] = useState(false)
+  const [optimResultOpen, setOptimResultOpen] = useState(false)
+  const [optimResultProfiles, setOptimResultProfiles] = useState(null)
+  const [optimizedFields, setOptimizedFields] = useState(() => new Set())
   const [optimModalOpen, setOptimModalOpen] = useState(false)
+  const [schemeModalOpen, setSchemeModalOpen] = useState(false)
+  const [loginModalOpen, setLoginModalOpen] = useState(false)
+  const [saveModalOpen, setSaveModalOpen] = useState(false)
   const [apiResult, setApiResult] = useState(null)
+  const [user, setUser] = useState(() => getStoredUser())
+  const [loadError, setLoadError] = useState(null)
+  const [requestError, setRequestError] = useState(null)
 
-  const rocketType = getRocketType(payload)
+  useEffect(() => {
+    let cancelled = false
+    const init = async () => {
+      try {
+        const templates = await fetchTemplates()
+        const first = templates[0]
+        if (!first || cancelled) return
+        const data = await fetchTemplate(first.file)
+        if (cancelled) return
+        setPayload(clonePayload(data))
+        setLoadError(null)
+      } catch (err) {
+        console.error(err.message || '加载默认模板失败')
+        if (cancelled) return
+        setPayload(clonePayload(DEFAULT_SCHEME.payload))
+        setLoadError('本地服务未启动，已加载内置模板。保存/打开方案需先运行 npm run server')
+      }
+    }
+    init()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const rocketType = payload ? getRocketType(payload) : 'CZ-2D'
+  const RocketPanel = getRocketPanel(rocketType)
   const series = useMemo(() => extractAllData(apiResult), [apiResult])
   const trajectoryPoints = useMemo(
     () => extractTrajectoryPoints(apiResult),
     [apiResult],
   )
-  const handlePresetChange = useCallback((nextPresetId) => {
-    setPresetId(nextPresetId)
-    setPayload(clonePayload(getPresetById(nextPresetId).payload))
+  const shiXuTable = useMemo(() => extractShiXuTable(apiResult), [apiResult])
+  const schemeName = getSchemeName(payload)
+
+  const handleSchemeSelect = useCallback((nextPayload) => {
+    setPayload(nextPayload)
     setApiResult(null)
+    setOptimizedFields(new Set())
   }, [])
 
-  const handleLoad = useCallback(() => {
-    fileInputRef.current?.click()
-  }, [])
-
-  const handleFileSelected = useCallback((event) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      try {
-        const json = JSON.parse(String(reader.result))
-        setPayload(json)
-        setApiResult(null)
-      } catch {
-        console.error('JSON 解析失败')
-      }
-    }
-    reader.readAsText(file, 'UTF-8')
-    event.target.value = ''
+  const clearOptimizedField = useCallback((field) => {
+    setOptimizedFields((prev) => {
+      if (!prev.has(field)) return prev
+      const next = new Set(prev)
+      next.delete(field)
+      return next
+    })
   }, [])
 
   const handleSave = useCallback(() => {
+    if (user) {
+      setSaveModalOpen(true)
+      return
+    }
+    if (!payload) return
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: 'application/json',
     })
@@ -76,56 +112,137 @@ export default function App() {
     anchor.download = `${payload.RocketInput?.Name ?? 'rocket'}.json`
     anchor.click()
     URL.revokeObjectURL(url)
+  }, [user, payload])
+
+  const handleSaveToServer = useCallback(async (name) => {
+    const next = clonePayload(payload)
+    if (next.RocketInput) {
+      next.RocketInput.Name = name
+    }
+    await saveUserScheme(name, next)
+    setPayload(next)
   }, [payload])
 
+  const handleLogout = useCallback(() => {
+    clearSession()
+    setUser(null)
+  }, [])
+
   const runRequest = useCallback(async (mode) => {
+    if (!payload) return
+    const runProfiles = mode === 'optimize'
+    const requestPayload = { ...payload, RunProfiles: runProfiles }
+    const rocketType = getRocketType(requestPayload)
+
+    if (!isApiSupportedRocketType(rocketType)) {
+      setRequestError(
+        `弹道 API 暂不支持型号「${rocketType}」。当前可用：${API_SUPPORTED_ROCKET_TYPES.join('、')}。请升级 astrox 服务后再试。`,
+      )
+      return
+    }
+
+    setRequestError(null)
+    setPayload(requestPayload)
     setLoading(true)
+    if (mode === 'optimize') {
+      setOptimizing(true)
+      setOptimResultOpen(false)
+      setOptimResultProfiles(null)
+    } else {
+      setOptimizedFields(new Set())
+    }
     try {
       const result =
         mode === 'optimize'
-          ? await optimizeTrajectory(payload)
-          : await calculateTrajectory(payload)
+          ? await optimizeTrajectory(requestPayload)
+          : await calculateTrajectory(requestPayload)
 
       setApiResult(result)
-      setPayload((prev) => mergeOptimizedPayload(prev, result))
+      setPayload((prev) =>
+        mergeOptimizedPayload({ ...prev, RunProfiles: runProfiles }, result, {
+          applyControls: runProfiles,
+        }),
+      )
+      if (mode === 'optimize') {
+        setOptimResultProfiles(result.Profiles ?? [])
+        setOptimizedFields(getOptimizedControlNames(result.Profiles ?? []))
+        setOptimResultOpen(true)
+      }
     } catch (error) {
       if (error.name !== 'AbortError') {
-        console.error(error.message || '请求失败')
+        const message = error.message || '请求失败'
+        console.error(message)
+        setRequestError(message)
       }
     } finally {
       setLoading(false)
+      setOptimizing(false)
     }
   }, [payload])
 
   const handleAbort = useCallback(() => {
     abortTrajectoryRequest()
     setLoading(false)
+    setOptimizing(false)
   }, [])
+
+  const handleOptimResultClose = useCallback(() => {
+    setOptimResultOpen(false)
+  }, [])
+
+  if (!payload) {
+    return (
+      <div className="app app-loading">
+        <p>加载方案模板…</p>
+      </div>
+    )
+  }
 
   return (
     <div className="app">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="application/json,.json"
-        style={{ display: 'none' }}
-        onChange={handleFileSelected}
-      />
-
+      {loadError && (
+        <div className="app-banner app-banner-warn" role="status">
+          {loadError}
+        </div>
+      )}
+      {requestError && (
+        <div className="app-banner app-banner-error" role="alert">
+          {requestError}
+        </div>
+      )}
       <TopBar
-        presetId={presetId}
-        onPresetChange={handlePresetChange}
-        startTime={startTime}
-        endTime={endTime}
-        onStartTimeChange={setStartTime}
-        onEndTimeChange={setEndTime}
+        rocketType={rocketType}
+        schemeName={schemeName}
+        user={user}
         loading={loading}
-        onLoad={handleLoad}
+        onOpenScheme={() => setSchemeModalOpen(true)}
         onSave={handleSave}
         onCalculate={() => runRequest('calculate')}
         onOptimize={() => runRequest('optimize')}
         onOpenOptimConfig={() => setOptimModalOpen(true)}
         onAbort={handleAbort}
+        onLogin={() => setLoginModalOpen(true)}
+        onLogout={handleLogout}
+      />
+
+      <LoginModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onSuccess={setUser}
+      />
+
+      <SchemeModal
+        open={schemeModalOpen}
+        user={user}
+        onClose={() => setSchemeModalOpen(false)}
+        onSelect={handleSchemeSelect}
+      />
+
+      <SaveSchemeModal
+        open={saveModalOpen}
+        defaultName={schemeName}
+        onClose={() => setSaveModalOpen(false)}
+        onSave={handleSaveToServer}
       />
 
       <OptimConfigModal
@@ -133,11 +250,26 @@ export default function App() {
         payload={payload}
         onChange={setPayload}
         onClose={() => setOptimModalOpen(false)}
+        onOptimize={() => runRequest('optimize')}
+        loading={loading}
+      />
+
+      <OptimWaitingOverlay open={optimizing} />
+
+      <OptimResultModal
+        open={optimResultOpen}
+        profiles={optimResultProfiles}
+        onClose={handleOptimResultClose}
       />
 
       <div className="app-main">
-        <ParamPanel payload={payload} onChange={setPayload} />
-        <TimelinePanel payload={payload} onChange={setPayload} />
+        <RocketPanel
+          payload={payload}
+          onChange={setPayload}
+          shiXuTable={shiXuTable}
+          optimizedFields={optimizedFields}
+          onClearOptimizedField={clearOptimizedField}
+        />
         <div className="center-column">
           <Cesium3D
             trajectoryPoints={trajectoryPoints}

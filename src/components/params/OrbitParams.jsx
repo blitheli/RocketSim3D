@@ -1,13 +1,16 @@
 import GroupBox from './GroupBox'
 import Field from './Field'
+import OptimInput from './OptimInput'
 
-export default function OrbitParams({ input, onChange }) {
+export default function OrbitParams({ input, onChange, optimizedFields }) {
   const smaKm = (input.sma0 ?? 0) / 1000
 
   return (
     <GroupBox title="入轨参数" className="orbit-params">
       <Field label="长半轴" unit="km">
-        <input
+        <OptimInput
+          field="sma0"
+          optimizedFields={optimizedFields}
           type="number"
           step="0.01"
           value={smaKm}
@@ -15,7 +18,9 @@ export default function OrbitParams({ input, onChange }) {
         />
       </Field>
       <Field label="偏心率">
-        <input
+        <OptimInput
+          field="ecc0"
+          optimizedFields={optimizedFields}
           type="number"
           step="0.000001"
           value={input.ecc0 ?? 0}
@@ -23,7 +28,9 @@ export default function OrbitParams({ input, onChange }) {
         />
       </Field>
       <Field label="轨道倾角" unit="deg">
-        <input
+        <OptimInput
+          field="inc0"
+          optimizedFields={optimizedFields}
           type="number"
           step="0.0001"
           value={input.inc0 ?? 0}
@@ -31,7 +38,9 @@ export default function OrbitParams({ input, onChange }) {
         />
       </Field>
       <Field label="近地点幅角" unit="deg">
-        <input
+        <OptimInput
+          field="omg0"
+          optimizedFields={optimizedFields}
           type="number"
           step="0.0001"
           value={input.omg0 ?? 0}

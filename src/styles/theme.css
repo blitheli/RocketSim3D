@@ -35,6 +35,8 @@ body,
   height: 100%;
   overflow: hidden;
   font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.45;
   color: var(--text);
   background: var(--bg-app);
 }
@@ -63,6 +65,18 @@ input:focus,
 select:focus {
   outline: 1px solid var(--accent);
   border-color: var(--accent);
+}
+
+input.input-optimized {
+  color: var(--text);
+  background: var(--bg-input);
+  border-color: rgba(255, 140, 66, 0.35);
+  box-shadow: inset 2px 0 0 rgba(255, 140, 66, 0.45);
+}
+
+input.input-optimized:focus {
+  border-color: rgba(255, 140, 66, 0.5);
+  box-shadow: inset 2px 0 0 rgba(255, 140, 66, 0.55);
 }
 
 ::-webkit-scrollbar {

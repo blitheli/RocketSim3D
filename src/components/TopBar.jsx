@@ -1,46 +1,37 @@
-import { ROCKET_PRESETS } from '../data/rockets'
+import { ROCKET_TYPES } from '../data/rockets'
 
 export default function TopBar({
-  presetId,
-  onPresetChange,
-  startTime,
-  endTime,
-  onStartTimeChange,
-  onEndTimeChange,
+  rocketType,
+  schemeName,
+  user,
   loading,
-  onLoad,
+  onOpenScheme,
   onSave,
   onCalculate,
   onOptimize,
   onOpenOptimConfig,
   onAbort,
+  onLogin,
+  onLogout,
 }) {
+  const typeInfo = ROCKET_TYPES[rocketType]
+
   return (
     <header className="top-bar">
-      <div className="top-bar-section">
-        <label>火箭型号</label>
-        <select value={presetId} onChange={(e) => onPresetChange(e.target.value)}>
-          {ROCKET_PRESETS.map((preset) => (
-            <option key={preset.id} value={preset.id}>
-              {preset.name}
-            </option>
-          ))}
-        </select>
+      <div className="top-bar-info">
+        <span className="top-bar-type">{typeInfo?.label ?? rocketType}</span>
+        <span className="top-bar-scheme">{schemeName || '未命名方案'}</span>
+        <button type="button" className="btn btn-sm" onClick={onOpenScheme}>
+          打开方案
+        </button>
+        <button type="button" className="btn btn-sm" onClick={onSave}>
+          保存
+        </button>
       </div>
 
-      <div className="top-bar-section">
-        <label>开始</label>
-        <input type="text" value={startTime} onChange={(e) => onStartTimeChange(e.target.value)} />
-      </div>
-
-      <div className="top-bar-section">
-        <label>结束</label>
-        <input type="text" value={endTime} onChange={(e) => onEndTimeChange(e.target.value)} />
-      </div>
+      <h1 className="top-bar-title">运载火箭方案弹道设计</h1>
 
       <div className="top-bar-actions">
-        <button type="button" className="btn" onClick={onLoad}>加载</button>
-        <button type="button" className="btn" onClick={onSave}>保存</button>
         <button
           type="button"
           className="btn btn-primary"
@@ -73,6 +64,15 @@ export default function TopBar({
         >
           终止优化
         </button>
+        {user ? (
+          <button type="button" className="btn top-bar-user" onClick={onLogout}>
+            {user.username}
+          </button>
+        ) : (
+          <button type="button" className="btn" onClick={onLogin}>
+            登录
+          </button>
+        )}
       </div>
     </header>
   )

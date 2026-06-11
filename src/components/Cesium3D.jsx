@@ -68,85 +68,71 @@ export default function Cesium3D({ trajectoryPoints, rocketType, launchSite }) {
     const viewer = viewerRef.current
     if (!viewer) return undefined
 
-    let cancelled = false
+    viewer.entities.removeAll()
 
-    async function renderScene() {
-      viewer.entities.removeAll()
+    const launchPos = getLaunchPosition(launchSite)
+    viewer.entities.add({
+      name: '发射点',
+      position: Cesium.Cartesian3.fromDegrees(
+        launchPos.lon,
+        launchPos.lat,
+        launchPos.alt,
+      ),
+      point: {
+        pixelSize: 10,
+        color: Cesium.Color.ORANGE,
+        outlineColor: Cesium.Color.WHITE,
+        outlineWidth: 1,
+      },
+      label: {
+        text: `发射点 ${launchSite ?? ''}`,
+        font: '14px sans-serif',
+        fillColor: Cesium.Color.WHITE,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        outlineWidth: 2,
+        outlineColor: Cesium.Color.BLACK,
+        pixelOffset: new Cesium.Cartesian2(0, -18),
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+    })
 
-      const launchPos = getLaunchPosition(launchSite)
+    if (trajectoryPoints?.length > 1) {
+      const positions = trajectoryPoints.map((p) =>
+        Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt),
+      )
+
       viewer.entities.add({
-        name: '发射点',
-        position: Cesium.Cartesian3.fromDegrees(
-          launchPos.lon,
-          launchPos.lat,
-          launchPos.alt,
-        ),
-        point: {
-          pixelSize: 10,
-          color: Cesium.Color.ORANGE,
-          outlineColor: Cesium.Color.WHITE,
-          outlineWidth: 1,
-        },
-        label: {
-          text: `发射点 ${launchSite ?? ''}`,
-          font: '14px sans-serif',
-          fillColor: Cesium.Color.WHITE,
-          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-          outlineWidth: 2,
-          outlineColor: Cesium.Color.BLACK,
-          pixelOffset: new Cesium.Cartesian2(0, -18),
-          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        name: '弹道轨迹',
+        polyline: {
+          positions,
+          width: 6,
+          material: new Cesium.PolylineGlowMaterialProperty({
+            glowPower: 0.15,
+            color: Cesium.Color.fromCssColorString('#C71585'),
+          }),
         },
       })
 
-      await addRocketModel(viewer, launchPos, rocketType, () => cancelled)
+      const last = trajectoryPoints[trajectoryPoints.length - 1]
+      viewer.entities.add({
+        name: '入轨点',
+        position: Cesium.Cartesian3.fromDegrees(last.lon, last.lat, last.alt),
+        point: {
+          pixelSize: 8,
+          color: Cesium.Color.LIME,
+        },
+      })
 
-      if (cancelled) return
-
-      if (trajectoryPoints?.length > 1) {
-        const positions = trajectoryPoints.map((p) =>
-          Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt),
-        )
-
-        viewer.entities.add({
-          name: '弹道轨迹',
-          polyline: {
-            positions,
-            width: 4,
-            material: new Cesium.PolylineGlowMaterialProperty({
-              glowPower: 0.2,
-              color: Cesium.Color.CYAN,
-            }),
-          },
-        })
-
-        const last = trajectoryPoints[trajectoryPoints.length - 1]
-        viewer.entities.add({
-          name: '入轨点',
-          position: Cesium.Cartesian3.fromDegrees(last.lon, last.lat, last.alt),
-          point: {
-            pixelSize: 8,
-            color: Cesium.Color.LIME,
-          },
-        })
-
-        viewer.zoomTo(viewer.entities)
-      } else {
-        viewer.camera.flyTo({
-          destination: Cesium.Cartesian3.fromDegrees(
-            launchPos.lon,
-            launchPos.lat,
-            2500000,
-          ),
-          duration: 0.5,
-        })
-      }
-    }
-
-    renderScene()
-
-    return () => {
-      cancelled = true
+      viewer.zoomTo(viewer.entities)
+    } else {
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(
+          launchPos.lon,
+          launchPos.lat,
+          2500000,
+        ),
+        duration: 0.5,
+      })
     }
   }, [trajectoryPoints, rocketType, launchSite])
 
@@ -165,85 +151,15 @@ function getLaunchPosition(site) {
   const sites = {
     ty: { lon: 112.6, lat: 38.8, alt: 1500 },
     xc: { lon: 102.0, lat: 28.2, alt: 1800 },
+    jq: { lon: 100.3, lat: 40.9, alt: 1000 },
     jqs: { lon: 100.3, lat: 40.9, alt: 1000 },
+    wc: { lon: 110.95, lat: 19.61, alt: 0 },
+    SLC40: { lon: -80.604, lat: 28.608, alt: 0 },
+    Vandenberg: { lon: -120.611, lat: 34.632, alt: 0 },
+    Baikonur: { lon: 63.342, lat: 45.964, alt: 100 },
+    Plesetsk: { lon: 40.357, lat: 62.928, alt: 200 },
+    Kourou: { lon: -52.768, lat: 5.239, alt: 0 },
+    Zhongzidao: { lon: 131.079, lat: 30.398, alt: 0 },
   }
   return sites[site] ?? sites.ty
-}
-
-async function addRocketModel(viewer, launchPos, rocketType, isCancelled) {
-  const meta = ROCKET_TYPES[rocketType] ?? ROCKET_TYPES['CZ-2D']
-  const position = Cesium.Cartesian3.fromDegrees(
-    launchPos.lon,
-    launchPos.lat,
-    launchPos.alt,
-  )
-
-  try {
-    const check = await fetch(meta.modelPath, { method: 'HEAD' })
-    if (!check.ok) throw new Error(`模型不存在: ${meta.modelPath}`)
-    if (isCancelled()) return
-
-    const entity = viewer.entities.add({
-      name: `${meta.label} 火箭模型`,
-      position,
-      orientation: Cesium.Transforms.headingPitchRollQuaternion(
-        position,
-        new Cesium.HeadingPitchRoll(0, 0, 0),
-      ),
-      model: {
-        uri: meta.modelPath,
-        minimumPixelSize: 96,
-        maximumScale: 50000,
-        scale: meta.modelScale ?? 1,
-      },
-    })
-
-    if (entity.model?.readyPromise) {
-      await entity.model.readyPromise
-      if (isCancelled()) return
-      autoScaleModel(entity, meta.targetHeight ?? 50)
-    }
-  } catch (error) {
-    console.warn('GLB 加载失败，使用占位模型:', error)
-    if (!isCancelled()) {
-      addRocketPlaceholder(viewer, launchPos, rocketType)
-    }
-  }
-}
-
-function autoScaleModel(entity, targetHeight) {
-  const radius = entity.model?.boundingSphere?.radius
-  if (!radius || radius <= 0) return
-  const diameter = radius * 2
-  if (diameter < targetHeight * 0.2 || diameter > targetHeight * 5) {
-    entity.model.scale = targetHeight / diameter
-  }
-}
-
-function addRocketPlaceholder(viewer, launchPos, rocketType) {
-  const meta = ROCKET_TYPES[rocketType] ?? ROCKET_TYPES['CZ-2D']
-  const height = (meta.stages ?? 2) === 2 ? 35000 : 48000
-
-  viewer.entities.add({
-    name: `${meta.label} 占位模型`,
-    position: Cesium.Cartesian3.fromDegrees(launchPos.lon, launchPos.lat, launchPos.alt + height / 2),
-    cylinder: {
-      length: height,
-      topRadius: 1200,
-      bottomRadius: 2500,
-      material: Cesium.Color.fromCssColorString('#8ea4bf').withAlpha(0.85),
-      outline: true,
-      outlineColor: Cesium.Color.WHITE.withAlpha(0.4),
-    },
-    label: {
-      text: `${meta.label}\n(模型加载失败)`,
-      font: '14px sans-serif',
-      fillColor: Cesium.Color.WHITE,
-      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Cesium.Color.BLACK,
-      pixelOffset: new Cesium.Cartesian2(0, -30),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
-    },
-  })
 }
