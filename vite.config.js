@@ -2,25 +2,27 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import cesium from 'vite-plugin-cesium'
 
+const WEBAPI_TARGET = process.env.VITE_WEBAPI_TARGET || 'http://localhost:8764'
+
 export default defineConfig({
   plugins: [react(), cesium()],
   server: {
     proxy: {
       '/api': {
-        target: 'http://astrox.cn:8764',
+        target: WEBAPI_TARGET,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/auth': {
-        target: 'http://localhost:3001',
+        target: WEBAPI_TARGET,
         changeOrigin: true,
       },
       '/templates': {
-        target: 'http://localhost:3001',
+        target: WEBAPI_TARGET,
         changeOrigin: true,
       },
       '/schemes': {
-        target: 'http://localhost:3001',
+        target: WEBAPI_TARGET,
         changeOrigin: true,
       },
     },

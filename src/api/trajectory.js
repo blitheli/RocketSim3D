@@ -1,4 +1,4 @@
-// 开发：Vite 代理 /api → astrox；生产：Express 反代 /api → astrox（同源，无 CORS/混合内容）
+// 开发：Vite 代理 /api、/auth、/templates、/schemes → ASTROX.Rocket WebApi（默认 :8764）
 const API_BASE = '/api'
 
 let activeController = null
