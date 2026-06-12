@@ -28,6 +28,7 @@ import { clearSession, getStoredUser } from './api/auth'
 import { fetchTemplate, fetchTemplates, saveUserScheme } from './api/schemes'
 import {
   extractAllData,
+  extractShiXuMarkEvents,
   extractShiXuTable,
   extractTrajectoryPoints,
 } from './utils/adapt'
@@ -80,6 +81,7 @@ export default function App() {
     [apiResult],
   )
   const shiXuTable = useMemo(() => extractShiXuTable(apiResult), [apiResult])
+  const markEvents = useMemo(() => extractShiXuMarkEvents(apiResult), [apiResult])
   const schemeName = getSchemeName(payload)
 
   const handleSchemeSelect = useCallback((nextPayload) => {
@@ -277,7 +279,7 @@ export default function App() {
             launchSite={payload.RocketInput?.Name_FaSheDian}
           />
           <div className="bottom-panel">
-            <TrajectoryCharts series={series} />
+            <TrajectoryCharts series={series} markEvents={markEvents} />
           </div>
         </div>
       </div>

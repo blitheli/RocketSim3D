@@ -164,7 +164,94 @@ export function buildOptimProfileSummaries(profiles) {
   }))
 }
 
-export function buildChartConfigs(series) {
+/** 从 DicKeyData 提取特征点时刻，供曲线 markLine 标注 */
+export function extractShiXuMarkEvents(apiResult) {
+  const dic = apiResult?.DicKeyData ?? apiResult?.dicKeyData ?? {}
+  const names = dic.Text ?? dic.text ?? []
+  const times = dic.tt ?? dic.t ?? []
+  if (!Array.isArray(names) || names.length === 0) return []
+
+  const events = []
+  for (let i = 0; i < names.length; i += 2) {
+    const label = String(names[i] ?? '').trim()
+    const time = Number(times[i])
+    if (!label || !Number.isFinite(time)) continue
+    events.push({ time, label })
+  }
+  return events
+}
+
+function buildMarkLine(markEvents) {
+  if (!markEvents?.length) return undefined
+  return {
+    symbol: 'none',
+    label: {
+      formatter: '{b}',
+      position: 'insideEndTop',
+      color: '#c8d0dc',
+      fontSize: 11,
+    },
+    lineStyle: { color: '#6b7a90', type: 'dashed' },
+    data: markEvents.map(({ time, label }) => ({ name: label, xAxis: time })),
+  }
+}
+
+function buildMaxQMarkPoint(time, q) {
+  if (!time?.length || !q?.length) return undefined
+  let maxIdx = 0
+  let maxVal = -Infinity
+  q.forEach((value, index) => {
+    if (Number.isFinite(value) && value > maxVal) {
+      maxVal = value
+      maxIdx = index
+    }
+  })
+  if (!Number.isFinite(maxVal)) return undefined
+  return {
+    symbol: 'circle',
+    symbolSize: 8,
+    label: {
+      formatter: '最大动压\n{c}',
+      color: '#ff8c42',
+      fontSize: 11,
+    },
+    itemStyle: { color: '#ff8c42' },
+    data: [{ name: '最大动压', coord: [time[maxIdx], maxVal], value: maxVal }],
+  }
+}
+
+function applyZoomEnhancements(option, { chartKey, markEvents, series }) {
+  const next = {
+    ...option,
+    grid: { ...option.grid, bottom: 72 },
+    dataZoom: [
+      { type: 'inside', xAxisIndex: 0 },
+      { type: 'slider', xAxisIndex: 0, height: 18, bottom: 16 },
+    ],
+    toolbox: {
+      right: 12,
+      top: 8,
+      feature: {
+        saveAsImage: { title: '保存图片', pixelRatio: 2 },
+        restore: { title: '还原' },
+      },
+      iconStyle: { borderColor: '#9aa8bc' },
+    },
+    series: option.series.map((item, index) => {
+      const enhanced = { ...item }
+      if (index === 0 && markEvents?.length) {
+        enhanced.markLine = buildMarkLine(markEvents)
+      }
+      if (chartKey === 'q' && index === 0) {
+        enhanced.markPoint = buildMaxQMarkPoint(series.time, series.q)
+      }
+      return enhanced
+    }),
+  }
+  return next
+}
+
+export function buildChartConfigs(series, { zoom = false, markEvents = [] } = {}) {
   const { time, q, height, velocity, overload, mass, thrust } = series
   const axisNameStyle = { color: '#c8d0dc', fontSize: 13 }
   const axisLabelStyle = { color: '#9aa8bc', fontSize: 12 }
@@ -215,7 +302,7 @@ export function buildChartConfigs(series) {
   const baseGrid = { left: 14, right: 18, top: 48, bottom: 52, containLabel: true }
   const titleStyle = { color: '#e8edf5', fontSize: 14 }
 
-  return {
+  const configs = {
     q: {
       title: '时间-动压/过载',
       option: {
@@ -285,4 +372,25 @@ export function buildChartConfigs(series) {
       },
     },
   }
+
+  if (!zoom) return configs
+
+  return Object.fromEntries(
+    Object.entries(configs).map(([key, config]) => [
+      key,
+      {
+        ...config,
+        option: applyZoomEnhancements(config.option, { chartKey: key, markEvents, series }),
+      },
+    ]),
+  )
 }
+
+export const CHART_TAB_DEFS = [
+  { id: 'q', label: '动压/过载', keys: ['q'] },
+  { id: 'hv', label: '高度/速度', keys: ['hv'] },
+  { id: 'n', label: '过载', keys: ['n'] },
+  { id: 'mass', label: '质量', keys: ['mass'] },
+  { id: 'thrust', label: '推力', keys: ['thrust'] },
+  { id: 'all', label: '全部', keys: ['q', 'hv', 'n', 'mass', 'thrust'] },
+]

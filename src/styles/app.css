@@ -32,7 +32,7 @@
 
 .center-column {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) minmax(220px, 32vh);
+  grid-template-rows: minmax(0, 1fr) minmax(260px, 36vh);
   min-width: 0;
   min-height: 0;
   border-bottom: 1px solid var(--border);
@@ -893,7 +893,7 @@
 
 .charts-hint {
   position: absolute;
-  inset: 0;
+  inset: 32px 0 0;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -904,6 +904,36 @@
   background: rgba(15, 20, 25, 0.35);
 }
 
+.charts-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.charts-tab {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.charts-tab:hover {
+  color: var(--text);
+  border-color: rgba(255, 140, 66, 0.45);
+}
+
+.charts-tab--active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
 .charts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -911,6 +941,17 @@
   gap: 8px;
   flex: 1;
   min-height: 200px;
+}
+
+.charts-grid--all {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(160px, 1fr);
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.charts-grid--single {
+  grid-template-columns: 1fr;
 }
 
 .chart-cell {
@@ -925,6 +966,10 @@
 }
 
 .chart-cell-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 4px 8px;
   font-size: 14px;
   font-weight: 600;
@@ -932,6 +977,24 @@
   border-bottom: 1px solid var(--border);
   background: var(--accent-soft);
   flex-shrink: 0;
+}
+
+.chart-zoom-btn {
+  flex-shrink: 0;
+  min-width: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.chart-zoom-btn:hover {
+  color: var(--accent);
+  border-color: rgba(255, 140, 66, 0.45);
 }
 
 .chart-cell-body {
@@ -995,6 +1058,24 @@
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
   }
+
+  .charts-grid--all {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-zoom-modal {
+  width: min(960px, 80vw);
+}
+
+.chart-zoom-body {
+  padding: 8px 12px 12px;
+}
+
+.chart-zoom-canvas {
+  width: 100%;
+  height: min(70vh, 560px);
+  min-height: 360px;
 }
 
 .modal-overlay {
