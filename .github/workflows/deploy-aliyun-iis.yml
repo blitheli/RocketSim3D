@@ -60,6 +60,9 @@ jobs:
           cache: npm
 
       - name: 构建前端
+        # Vite 在构建期写入 import.meta.env.VITE_CESIUM_ION_TOKEN；未配置 secret 时为空字符串，仍走 OSM 底图，不因此失败。
+        env:
+          VITE_CESIUM_ION_TOKEN: ${{ secrets.VITE_CESIUM_ION_TOKEN }}
         run: |
           npm ci
           npm run build

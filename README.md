@@ -47,11 +47,12 @@ npm run build    # 产出 dist/
 
 | Secret | 说明 |
 | ------ | ---- |
-| `ALIYUN_HOST` | 阿里云 Windows 主机 |
-| `ALIYUN_USERNAME` | OpenSSH 用户名 |
-| `ALIYUN_PASSWORD` | OpenSSH 密码 |
+| `ALIYUN_HOST` | 阿里云 Windows 主机（必填；缺失则失败） |
+| `ALIYUN_USERNAME` | OpenSSH 用户名（必填；缺失则失败） |
+| `ALIYUN_PASSWORD` | OpenSSH 密码（必填；缺失则失败） |
+| `VITE_CESIUM_ION_TOKEN` | Cesium Ion（可选；与 Vite 环境变量同名）。生产 Ion 地图需在 Repository secrets 配置；**构建期**注入 `npm ci` / `npm run build`，非运行时。未配置或为空时构建仍成功，站点回退 OSM 底图 |
 
-服务器需开启 OpenSSH Server。不要把密码写进仓库或打印到日志。
+服务器需开启 OpenSSH Server。不要把密码或 Ion token 写进仓库或打印到日志。
 
 本地仍可用 `deploy/iis/pack.ps1` / `publish.ps1` 手工发布，与 CI 互不替代。
 
@@ -60,9 +61,9 @@ npm run build    # 产出 dist/
 | 变量 | 说明 | 默认 |
 | ---- | ---- | ---- |
 | `VITE_WEBAPI_TARGET` | 开发时代理目标 | `http://astrox.cn:8764` |
-| `VITE_CESIUM_ION_TOKEN` | Cesium Ion（构建期） | 未设置则仅 OSM 底图 |
+| `VITE_CESIUM_ION_TOKEN` | Cesium Ion access token（**构建期**由 Vite 烘焙进产物，非运行时可读） | 未设置则仅 OSM 底图 |
 
-写入 `.env.local` 后需重启 Vite。
+本地写入 `.env.local` 后需重启 Vite。阿里云 IIS 的 GitHub Actions 部署须在仓库配置同名 Secret `VITE_CESIUM_ION_TOKEN`，才会在 `npm run build` 时打入生产包；缺省不阻止部署。
 
 ## 文档
 

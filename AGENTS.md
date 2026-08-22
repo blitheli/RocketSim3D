@@ -83,11 +83,12 @@ npm run build
 ## 环境变量
 
 - `VITE_WEBAPI_TARGET`：开发代理目标（默认 `http://astrox.cn:8764`）
-- `VITE_CESIUM_ION_TOKEN`：Cesium Ion（构建期）
+- `VITE_CESIUM_ION_TOKEN`：Cesium Ion（**构建期**烘焙进产物，非运行时）。本地用 `.env.local`；生产阿里云 IIS 部署需仓库 Secret `VITE_CESIUM_ION_TOKEN`（与 Vite 环境变量同名）。空 token 时 OSM 底图回退，CI 不因此失败（与必填的 `ALIYUN_*` 不同）
 
 ## 部署（阿里云 IIS）
 
 - CI：推送 `main` → `.github/workflows/deploy-aliyun-iis.yml` 构建并将站点文件同步到 `D:/IIS/RocketSim3D`。
 - 机制：与 **ASTROX.Docs** 一致——`ubuntu-latest` + OpenSSH（`appleboy/ssh-action` / `scp-action`，port 22；Repository secrets：`ALIYUN_HOST` / `ALIYUN_USERNAME` / `ALIYUN_PASSWORD`）。不要另起一套传输或另一条生产流水线。
+- Cesium Ion：构建步骤须带 `env.VITE_CESIUM_ION_TOKEN: ${{ secrets.VITE_CESIUM_ION_TOKEN }}`；生产 Ion 地图依赖该 Repository secret。勿把真实 token 写入仓库。
 - 本地：`deploy/iis/pack.ps1`、`publish.ps1`；站点根须直接含 `index.html` 与 `assets/`，不要嵌套 `dist/`。
 - 本仓库无后端；勿部署 `node_modules`。
