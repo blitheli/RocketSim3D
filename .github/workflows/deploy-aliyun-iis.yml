@@ -1,0 +1,60 @@
+# 推送到 main 时构建静态站点并经 OpenSSH 同步到阿里云 IIS。
+# 传输机制对齐同组织 CesiumAI（appleboy/ssh-action + scp-action；
+# Secrets：ALIYUN_HOST / ALIYUN_USERNAME / ALIYUN_PASSWORD）。
+# 未能读取私有仓库 ASTROX.Docs 的 workflow；若 Docs 使用不同机制，请对照后调整。
+
+name: 部署到阿里云 IIS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-aliyun-iis
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: 构建并部署
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: 构建前端
+        run: |
+          npm ci
+          npm run build
+
+      - name: 校验 dist/index.html
+        run: |
+          if [ ! -f dist/index.html ]; then
+            echo "未找到 dist/index.html，构建可能失败"
+            exit 1
+          fi
+
+      - name: 清空远端站点目录
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.ALIYUN_HOST }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+          script: |
+            powershell -NoProfile -Command "if (Test-Path 'D:\IIS\RocketSim3D') { Get-ChildItem -Force 'D:\IIS\RocketSim3D' | Remove-Item -Recurse -Force }; New-Item -ItemType Directory -Force -Path 'D:\IIS\RocketSim3D' | Out-Null"
+
+      - name: 上传 dist/ 内容到 IIS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ALIYUN_HOST }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+          source: "dist/"
+          target: "D:/IIS/RocketSim3D"
+          strip_components: 1

@@ -84,3 +84,10 @@ npm run build
 
 - `VITE_WEBAPI_TARGET`：开发代理目标（默认 `http://astrox.cn:8764`）
 - `VITE_CESIUM_ION_TOKEN`：Cesium Ion（构建期）
+
+## 部署（阿里云 IIS）
+
+- CI：推送 `main` → `.github/workflows/deploy-aliyun-iis.yml` 构建并将 `dist/` 内容同步到 `D:\IIS\RocketSim3D`。
+- 机制：与同组织 CesiumAI 一致——`ubuntu-latest` + OpenSSH（Secrets：`ALIYUN_HOST` / `ALIYUN_USERNAME` / `ALIYUN_PASSWORD`），不要另起一套传输或另一条生产流水线。
+- 本地：`deploy/iis/pack.ps1`、`publish.ps1`；站点根须直接含 `index.html` 与 `assets/`，不要嵌套 `dist/`。
+- 本仓库无后端；勿部署 `node_modules`。

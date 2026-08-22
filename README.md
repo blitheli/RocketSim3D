@@ -32,7 +32,19 @@ npm run dev      # http://localhost:5173
 npm run build    # 产出 dist/
 ```
 
-将 `dist/` 作为静态站点托管即可。Windows 上打包/同步脚本见 [deploy/iis/](deploy/iis/)。
+将 `dist/` 作为静态站点托管即可。Windows 上本地打包/同步脚本见 [deploy/iis/](deploy/iis/)。
+
+### GitHub Actions 自动部署（阿里云 IIS）
+
+推送到 `main`（或手动 `workflow_dispatch`）时，[`.github/workflows/deploy-aliyun-iis.yml`](.github/workflows/deploy-aliyun-iis.yml) 会：
+
+1. `npm ci` + `npm run build`（Node 20）
+2. 校验存在 `dist/index.html`
+3. 经 OpenSSH 清空并上传 `dist/` **内容**到服务器 `D:\IIS\RocketSim3D`（站点根下直接是 `index.html`、`assets/`，不含嵌套 `dist/`）
+
+传输方式与同组织 [CesiumAI](https://github.com/blitheli/CesiumAI) 前端部署一致（`appleboy/ssh-action` + `appleboy/scp-action`）。仓库需已配置 Secrets：`ALIYUN_HOST`、`ALIYUN_USERNAME`、`ALIYUN_PASSWORD`；服务器需开启 OpenSSH Server。不要把密码写进仓库或打印到日志。
+
+本地仍可用 `deploy/iis/pack.ps1` / `publish.ps1` 手工发布，与 CI 互不替代。
 
 ### 环境变量
 
