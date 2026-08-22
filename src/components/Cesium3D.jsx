@@ -15,7 +15,34 @@ function applySharpRendering(viewer) {
   viewer.resize()
 }
 
+function createOsmImageryViewModel() {
+  return new Cesium.ProviderViewModel({
+    name: 'OpenStreetMap',
+    tooltip: 'OpenStreetMap 影像',
+    iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
+    creationFunction() {
+      return new Cesium.UrlTemplateImageryProvider({
+        url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        credit: '© OpenStreetMap contributors',
+        maximumLevel: 19,
+      })
+    },
+  })
+}
+
+function createEllipsoidTerrainViewModel() {
+  return new Cesium.ProviderViewModel({
+    name: 'WGS84 椭球',
+    tooltip: '无地形起伏（椭球面）',
+    iconUrl: Cesium.buildModuleUrl('Widgets/Images/TerrainProviders/Ellipsoid.png'),
+    creationFunction() {
+      return new Cesium.EllipsoidTerrainProvider()
+    },
+  })
+}
+
 export default function Cesium3D({ trajectoryPoints, rocketType, launchSite }) {
+  const panelRef = useRef(null)
   const containerRef = useRef(null)
   const viewerRef = useRef(null)
 
@@ -23,30 +50,38 @@ export default function Cesium3D({ trajectoryPoints, rocketType, launchSite }) {
     if (!containerRef.current || viewerRef.current) return undefined
 
     const hasIonToken = Boolean(import.meta.env.VITE_CESIUM_ION_TOKEN)
+    const osmImagery = createOsmImageryViewModel()
+    const ellipsoidTerrain = createEllipsoidTerrainViewModel()
+    const imageryProviderViewModels = hasIonToken
+      ? [...Cesium.createDefaultImageryProviderViewModels(), osmImagery]
+      : [osmImagery]
+    const terrainProviderViewModels = hasIonToken
+      ? Cesium.createDefaultTerrainProviderViewModels()
+      : [ellipsoidTerrain]
+
     const viewer = new Cesium.Viewer(containerRef.current, {
       animation: false,
       timeline: false,
-      baseLayerPicker: false,
+      baseLayerPicker: true,
       geocoder: false,
       homeButton: true,
       sceneModePicker: true,
       navigationHelpButton: false,
-      fullscreenButton: false,
+      fullscreenButton: true,
+      fullscreenElement: panelRef.current ?? containerRef.current,
       infoBox: false,
       selectionIndicator: false,
-      imageryProvider: false,
-      terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
+      imageryProviderViewModels,
+      selectedImageryProviderViewModel: hasIonToken
+        ? imageryProviderViewModels[0]
+        : osmImagery,
+      terrainProviderViewModels,
+      selectedTerrainProviderViewModel: hasIonToken
+        ? terrainProviderViewModels.find((m) => /terrain/i.test(m.name)) ??
+          terrainProviderViewModels[0]
+        : ellipsoidTerrain,
       useBrowserRecommendedResolution: false,
     })
-
-    if (!hasIonToken) {
-      viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-          url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          credit: '© OpenStreetMap contributors',
-        }),
-      )
-    }
 
     viewer.scene.globe.depthTestAgainstTerrain = true
     applySharpRendering(viewer)
@@ -137,7 +172,7 @@ export default function Cesium3D({ trajectoryPoints, rocketType, launchSite }) {
   }, [trajectoryPoints, rocketType, launchSite])
 
   return (
-    <div className="view-panel">
+    <div className="view-panel" ref={panelRef}>
       <div className="cesium-overlay">
         Cesium 三维弹道 | {ROCKET_TYPES[rocketType]?.label ?? rocketType}
         {trajectoryPoints?.length ? ` | ${trajectoryPoints.length} 轨迹点` : ' | 等待计算结果'}

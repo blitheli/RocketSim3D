@@ -44,7 +44,7 @@ try {
 }
 catch {
     Write-Warning "WebApi 未响应: $($_.Exception.Message)"
-    Write-Warning "请先在服务器上启动 ASTROX.Rocket WebApi（默认 :8764），并确认 IIS 已启用 ARR 反向代理。"
+    Write-Warning "请确认 WebApi 已启动（$WebApiUrl）。"
 }
 
 Write-Host "==> 发布完成" -ForegroundColor Green

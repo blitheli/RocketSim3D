@@ -39,8 +39,8 @@ flowchart TB
 ## 数据与 API
 
 - `src/data/rockets.js`: 三个火箭元数据（型号、Panel 映射）；默认模板从 `public/templates/` 加载
-- `src/api/trajectory.js`: `POST /Rocket/TrajectoryOptim`，请求体 `{ RocketInput, Profiles, RunProfiles, GetAllData:true, GetKeyData:true }`
-- **跨域**: 在 `vite.config.js` 配置 proxy，将 `/api` 代理到 `http://astrox.cn:8764`
+- `src/api/trajectory.js`: `POST /api/Rocket/TrajectoryOptim`，请求体 `{ RocketInput, Profiles, RunProfiles, GetAllData:true, GetKeyData:true }`
+- 开发跨域：`vite.config.js` 将 `/api` 等路径代理到 `VITE_WEBAPI_TARGET`
 - **响应字段**: `DicShiXu` / `DicKeyData` / `DicAllData` / `DicZJLD`
 - **曲线（默认）**: 时间-动压、时间-高度&速度（双 Y 轴）、时间-轴向过载、时间-质量、时间-推力
 
@@ -120,7 +120,7 @@ src/
 ## 待确认 / 风险
 
 - glb 火箭模型需放在 `public/models/`，文件名与 `rockets.js` 中 `modelPath` 一致
-- 外网 API 的 CORS / 可用性，通过 Vite proxy 规避浏览器跨域
+- 开发环境用 Vite 代理访问 API
 - 无 Cesium Ion Token 时使用 OpenStreetMap 底图；设置 `VITE_CESIUM_ION_TOKEN` 可启用 World Terrain
 
 ## 启动

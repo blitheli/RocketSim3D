@@ -27,5 +27,5 @@ Write-Host "==> 打包 dist/ → $OutZip" -ForegroundColor Cyan
 Compress-Archive -Path (Join-Path $DistPath "*") -DestinationPath $OutZip -Force
 
 Write-Host "==> 完成" -ForegroundColor Green
-Write-Host "请将 $OutZip 上传到服务器并解压到 IIS 站点目录（如 C:\inetpub\RocketSim3D）"
-Write-Host "详见 deploy/iis/README.md「阿里云远程服务器」一节"
+Write-Host "请将 $OutZip 上传并解压到 IIS 站点目录（如 C:\inetpub\RocketSim3D）"
+Write-Host "说明见 deploy/iis/README.md"

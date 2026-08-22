@@ -434,6 +434,13 @@
   background: #05070a;
 }
 
+.view-panel:fullscreen,
+.view-panel:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  background: #05070a;
+}
+
 .bottom-panel {
   display: flex;
   flex-direction: column;
