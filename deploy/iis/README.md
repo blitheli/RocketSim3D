@@ -6,11 +6,12 @@
 
 ## CI 自动部署（推荐）
 
-推送到 `main` 时，GitHub Actions「部署到阿里云 IIS」会构建并把 `dist/` 内容同步到服务器 `D:\IIS\RocketSim3D`。
+推送到 `main` 时，GitHub Actions「部署到阿里云 IIS」会构建并把站点文件同步到 `D:/IIS/RocketSim3D`。
 
 - Workflow：`.github/workflows/deploy-aliyun-iis.yml`
-- Secrets（与同组织 CesiumAI 共用命名）：`ALIYUN_HOST`、`ALIYUN_USERNAME`、`ALIYUN_PASSWORD`
-- 传输：OpenSSH（`appleboy/ssh-action` 清空目录 + `appleboy/scp-action` 上传）
+- 机制：与 **ASTROX.Docs** 一致（`ubuntu-latest` + `appleboy/ssh-action@v1.2.0` + `appleboy/scp-action@v0.1.7`，port 22）
+- Repository secrets（非 Environment）：`ALIYUN_HOST`、`ALIYUN_USERNAME`、`ALIYUN_PASSWORD`
+- 上传：先 `rsync dist/ → _deploy/`，再 SCP `_deploy/*`（`strip_components: 1`，`tar_dereference: true`，不设 `overwrite`）
 
 CI 与下方本地脚本目标一致：站点根直接是 `index.html`、`assets/`，不要多套一层 `dist`。
 
@@ -22,7 +23,7 @@ CI 与下方本地脚本目标一致：站点根直接是 `index.html`、`assets
 .\deploy\iis\pack.ps1
 ```
 
-生成 `deploy/iis/RocketSim3D-dist.zip`。解压到站点目录（例如 `D:\IIS\RocketSim3D`），根下应直接有 `index.html`、`assets/`，不要多套一层 `dist`。
+生成 `deploy/iis/RocketSim3D-dist.zip`。解压到站点目录（例如 `D:/IIS/RocketSim3D`），根下应直接有 `index.html`、`assets/`，不要多套一层 `dist`。
 
 本机同步：
 
@@ -32,7 +33,7 @@ CI 与下方本地脚本目标一致：站点根直接是 `index.html`、`assets
 
 ## IIS 站点
 
-- 物理路径指向解压后的目录（如 `D:\IIS\RocketSim3D`）
+- 物理路径指向解压后的目录（如 `D:/IIS/RocketSim3D`）
 - 绑定所需端口（如 8088）
 - 应用程序池：无托管代码
 

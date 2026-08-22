@@ -36,13 +36,22 @@ npm run build    # 产出 dist/
 
 ### GitHub Actions 自动部署（阿里云 IIS）
 
-推送到 `main`（或手动 `workflow_dispatch`）时，[`.github/workflows/deploy-aliyun-iis.yml`](.github/workflows/deploy-aliyun-iis.yml) 会：
+推送到 `main`（相关路径变更）或手动 `workflow_dispatch` 时，[`.github/workflows/deploy-aliyun-iis.yml`](.github/workflows/deploy-aliyun-iis.yml) 会：
 
-1. `npm ci` + `npm run build`（Node 20）
-2. 校验存在 `dist/index.html`
-3. 经 OpenSSH 清空并上传 `dist/` **内容**到服务器 `D:\IIS\RocketSim3D`（站点根下直接是 `index.html`、`assets/`，不含嵌套 `dist/`）
+1. 检查 Repository secrets（非 Environment）是否齐全
+2. `npm ci` + `npm run build`（Node 20）
+3. 校验存在 `dist/index.html`
+4. `rsync` 到 `_deploy/`，经 OpenSSH 清空并 SCP 上传到 `D:/IIS/RocketSim3D`（站点根直接是 `index.html`、`assets/`，不含嵌套 `dist/`）
 
-传输方式与同组织 [CesiumAI](https://github.com/blitheli/CesiumAI) 前端部署一致（`appleboy/ssh-action` + `appleboy/scp-action`）。仓库需已配置 Secrets：`ALIYUN_HOST`、`ALIYUN_USERNAME`、`ALIYUN_PASSWORD`；服务器需开启 OpenSSH Server。不要把密码写进仓库或打印到日志。
+机制与 **ASTROX.Docs** 一致：`ubuntu-latest` + `appleboy/ssh-action@v1.2.0` + `appleboy/scp-action@v0.1.7`（`port: 22`，`tar_dereference: true`，不设 `overwrite`）。仓库需配置：
+
+| Secret | 说明 |
+| ------ | ---- |
+| `ALIYUN_HOST` | 阿里云 Windows 主机 |
+| `ALIYUN_USERNAME` | OpenSSH 用户名 |
+| `ALIYUN_PASSWORD` | OpenSSH 密码 |
+
+服务器需开启 OpenSSH Server。不要把密码写进仓库或打印到日志。
 
 本地仍可用 `deploy/iis/pack.ps1` / `publish.ps1` 手工发布，与 CI 互不替代。
 

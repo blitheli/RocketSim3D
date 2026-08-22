@@ -1,13 +1,21 @@
 # 推送到 main 时构建静态站点并经 OpenSSH 同步到阿里云 IIS。
-# 传输机制对齐同组织 CesiumAI（appleboy/ssh-action + scp-action；
-# Secrets：ALIYUN_HOST / ALIYUN_USERNAME / ALIYUN_PASSWORD）。
-# 未能读取私有仓库 ASTROX.Docs 的 workflow；若 Docs 使用不同机制，请对照后调整。
+# 机制对齐 ASTROX.Docs（ubuntu-latest + appleboy/ssh-action@v1.2.0 +
+# appleboy/scp-action@v0.1.7；Repository secrets：ALIYUN_HOST /
+# ALIYUN_USERNAME / ALIYUN_PASSWORD；port 22）。
 
 name: 部署到阿里云 IIS
 
 on:
   push:
     branches: [main]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.config.js"
+      - ".github/workflows/deploy-aliyun-iis.yml"
   workflow_dispatch:
 
 concurrency:
@@ -21,6 +29,29 @@ jobs:
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
+
+      - name: 检查阿里云 Secrets
+        env:
+          ALIYUN_HOST: ${{ secrets.ALIYUN_HOST }}
+          ALIYUN_USERNAME: ${{ secrets.ALIYUN_USERNAME }}
+          ALIYUN_PASSWORD: ${{ secrets.ALIYUN_PASSWORD }}
+        run: |
+          missing=0
+          if [ -z "$ALIYUN_HOST" ]; then
+            echo "::error::缺少仓库 Secret: ALIYUN_HOST（请在 Repository secrets 中配置，不要用 Environment secrets）"
+            missing=1
+          fi
+          if [ -z "$ALIYUN_USERNAME" ]; then
+            echo "::error::缺少仓库 Secret: ALIYUN_USERNAME（请在 Repository secrets 中配置，不要用 Environment secrets）"
+            missing=1
+          fi
+          if [ -z "$ALIYUN_PASSWORD" ]; then
+            echo "::error::缺少仓库 Secret: ALIYUN_PASSWORD（请在 Repository secrets 中配置，不要用 Environment secrets）"
+            missing=1
+          fi
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
 
       - name: 安装 Node.js
         uses: actions/setup-node@v4
@@ -40,21 +71,31 @@ jobs:
             exit 1
           fi
 
+      - name: 准备上传目录
+        run: |
+          rm -rf _deploy
+          mkdir -p _deploy
+          rsync -a dist/ _deploy/
+
       - name: 清空远端站点目录
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.ALIYUN_HOST }}
           username: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
+          port: 22
+          script_stop: true
           script: |
-            powershell -NoProfile -Command "if (Test-Path 'D:\IIS\RocketSim3D') { Get-ChildItem -Force 'D:\IIS\RocketSim3D' | Remove-Item -Recurse -Force }; New-Item -ItemType Directory -Force -Path 'D:\IIS\RocketSim3D' | Out-Null"
+            powershell -NoProfile -Command "$p='D:/IIS/RocketSim3D'; if (Test-Path $p) { Get-ChildItem -Force $p | Remove-Item -Recurse -Force }; New-Item -ItemType Directory -Path $p -Force | Out-Null"
 
-      - name: 上传 dist/ 内容到 IIS
+      - name: 上传站点文件到 IIS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.ALIYUN_HOST }}
           username: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          source: "dist/"
+          port: 22
+          source: "_deploy/*"
           target: "D:/IIS/RocketSim3D"
           strip_components: 1
+          tar_dereference: true
